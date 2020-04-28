@@ -12,11 +12,10 @@ library(caret)
 
 #Data Path
 opt = list(
-  SCE = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_data.RDS",
-  cell_labels = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_lab.RDS",
+  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
   outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexAll.RDS",
-  sampleName = "indexAll_RF"
+  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold01.RDS",
+  sampleName = "indexFold01_RF"
 )
 # command line arguments are parsed
 #option_list = list(
@@ -41,18 +40,20 @@ Ntrees <- 500
 ################################################################################
 ## load input data
 sce_data = readRDS(opt$SCE)
-lab_data = readRDS(opt$cell_labels)
+lab_data = colData(sce_data)$true_label
 cvindex = readRDS(opt$CVindex)
-#dat <- assay(sce_data)
 
-#data frame TO DO: updata to correct imput data format
-data_rf <- bind_cols(lab_data,sce_data) %>%
-  mutate(label=as.factor(label))
-lev = levels(data_rf$label)
+#data frame
+lab_data <- data.frame(label=lab_data)
+dat <- as.data.frame(t(normcounts(sce_data)))
+rownames(dat) <- colnames(sce_data)
+colnames(dat) <- gsub("-","_",colnames(dat))
+data_rf <- cbind(droplevels(lab_data),dat[,which(apply(dat,2,sum) != 0)])
+
 
 #cross validation
-training_fold = data_rf[cvindex$train_data, ]
-test_fold = data_rf[cvindex$test_data, ]
+training_fold = data_rf[rownames(data_rf) %in% cvindex$train_data, ]
+test_fold = data_rf[rownames(data_rf) %in% cvindex$test_data, ]
 
 #random forest
 classifier <- randomForest(label~.,

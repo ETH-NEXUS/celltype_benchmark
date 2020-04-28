@@ -13,7 +13,7 @@ library(Hmisc)
 opt = list(
   outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
   CVfiles = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-  cell_labels = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_lab.RDS",
+  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
   sampleName = "CV_summary"
 )
 # command line arguments are parsed
@@ -42,13 +42,16 @@ svm_files <- IF_files[grep("_SVM_",IF_files)]
 cv_files <- IF_files[grep(".RDS",IF_files)]
 mat <- cbind(cv_files,rf_files,svm_files)
 
-#TO DO: change to correct imput format
-lab_data = readRDS(opt$cell_labels)
+#load data
+sce_data = readRDS(opt$SCE)
+lab_data = colData(sce_data)$true_label
+barcode = colnames(sce_data)
 
-lab_mat <- data.frame(true_lab=lab_data$label,rf_lab=NA,svm_lab=NA,folds=NA)
+lab_mat <- data.frame(true_lab=lab_data,rf_lab=NA,svm_lab=NA,folds=NA)
 for (i in 1:nrow(mat)){
   tmp <- readRDS(opt$CVfiles %&% mat[i,1])
-  idx <- tmp$test_data
+  bc <- tmp$test_data
+  idx <- which(barcode %in% bc)
   rf <- read_csv(opt$CVfiles %&% mat[i,2])
   svm <- read_csv(opt$CVfiles %&% mat[i,3])
   lab_mat[idx,"rf_lab"] <- rf$x

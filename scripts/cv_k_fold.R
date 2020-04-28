@@ -7,6 +7,12 @@ library(optparse)
 library(tidyverse)
 library(caret)
 
+#Data Path
+opt = list(
+  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
+  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS"
+)
+
 # command line arguments are parsed
 option_list = list(
   make_option("--cell_labels", type = "character", help = "Path to the file containing cell lables."),
@@ -23,17 +29,21 @@ Kfold <- 10
 ## main code starts here
 ################################################################################
 ## load input data
-lab_data <- read_csv(opt$LabelsPath)
-lab_data <- rename(lab_data,"label"="x")
+sce_data <- readRDS(opt$SCE)
+lab_data <- colData(sce_data)$true_label
+barcode <- colnames(sce_data)
 
 # cross validation
 ##################
-folds = createFolds(lab_data$label, k = Kfold,list = T)
-allIndex <- 1:nrow(lab_data)
+folds = createFolds(lab_data, k = Kfold,list = T)
+allIndex <- 1:length(lab_data)
 for(i in 1:length(folds)){
-  test_data <- folds[[i]]
-  train_data <- allIndex[-folds[[i]]]
+  test_idx <- folds[[i]]
+  train_idx <- allIndex[-folds[[i]]]
+  test_data <- barcode[test_idx]
+  train_data <- barcode[train_idx]
   saveRDS(list(test_data=test_data,train_data=train_data),
             paste(opt$outputDirec,"index",names(folds)[i],".RDS",sep=""))
 }
-saveRDS(list(test_data=numeric(),train_data=allIndex),paste(opt$outputDirec,"indexAll.RDS",sep=""))
+saveRDS(list(test_data=numeric(),train_data=barcode[allIndex]),paste(opt$outputDirec,"indexAll.RDS",sep=""))
+
