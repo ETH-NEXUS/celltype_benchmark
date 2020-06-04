@@ -11,23 +11,22 @@ library(caret)
 
 
 #Data Path
-opt = list(
-  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold01.RDS",
-  sampleName = "indexFold01_RF"
-)
-# command line arguments are parsed
-#option_list = list(
-#  make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
-#  make_option("--cell_labels", type = "character", help = "Path to the file containing the cell labels."),
-#  make_option("--CVindex", type = "character", help = "Path to the file containing the indices of the cross validation."),
-#  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
-#  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
+#opt = list(
+#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
+#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
+#  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold01.RDS",
+#  sampleName = "Fold01"
 #)
+# command line arguments are parsed
+option_list = list(
+  make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),
+  make_option("--CVindex", type = "character", help = "Path to the file containing the indices of the cross validation."),
+  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
+  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
+)
 
-#opt_parser = OptionParser(option_list = option_list)
-#opt = parse_args(opt_parser)
+opt_parser = OptionParser(option_list = option_list)
+opt = parse_args(opt_parser)
 
 
 # Parameters
@@ -67,7 +66,7 @@ if (!is_empty(cvindex$test_data)){
   #confusion matrix
   #cm = confusionMatrix(y_test$label, y_pred)
   #saveRDS(cm, path %&% "_cm.RDS")
-  write.csv(y_pred,path %&% "_pred_label.csv",quote = F,row.names = F)
+  write.csv(y_pred,path %&% "_RF_pred_label.csv",quote = F,row.names = F)
 } else {
-  saveRDS(classifier, path %&% "_model.RDS")
+  saveRDS(classifier, path %&% "_RF_model.RDS")
 }

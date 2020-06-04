@@ -8,14 +8,14 @@ library(tidyverse)
 library(caret)
 
 #Data Path
-opt = list(
-  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS"
-)
+#opt = list(
+#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
+#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS"
+#)
 
 # command line arguments are parsed
 option_list = list(
-  make_option("--cell_labels", type = "character", help = "Path to the file containing cell lables."),
+  make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),
   make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
 )
 

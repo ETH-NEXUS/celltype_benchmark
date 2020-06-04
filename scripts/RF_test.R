@@ -9,24 +9,23 @@ library(randomForest)
 library(cowplot)
 
 #Data Path
-opt = list(
-  DataPath = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_data_test.RDS",
-  LabelsPath = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_lab_test.RDS",
-  outputDirec = "/Users/bolars/Documents/celltyping/Zheng_sorted/",
-  rf_model = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_RF_model.RDS",
-  sampleName = "ZhengSorted_RF"
-)
-# command line arguments are parsed
-#option_list = list(
-#  make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
-#  make_option("--cell_labels", type = "character", help = "Path to the file containing the cell labels."),
-#  make_option("--rf_model", type = "character", help = "Path to the file containing the pretrained RF model."),
-#  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
-#  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
+#opt = list(
+#  DataPath = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_data_test.RDS",
+#  LabelsPath = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_lab_test.RDS",
+#  outputDirec = "/Users/bolars/Documents/celltyping/Zheng_sorted/",
+#  rf_model = "/Users/bolars/Documents/celltyping/Zheng_sorted/ZhengSorted_RF_model.RDS",
+#  sampleName = "ZhengSorted"
 #)
+# command line arguments are parsed
+option_list = list(
+  make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
+  make_option("--rf_model", type = "character", help = "Path to the file containing the pretrained RF model."),
+  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
+  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
+)
 
-#opt_parser = OptionParser(option_list = option_list)
-#opt = parse_args(opt_parser)
+opt_parser = OptionParser(option_list = option_list)
+opt = parse_args(opt_parser)
 
 
 # Parameters
@@ -57,4 +56,4 @@ pred.rf[idx.unk] <- "unknown"
 
 ################################################################################
 ## save predicted labels
-write.csv(pred.rf,path %&% "_pred_test_labels.csv")
+write.csv(pred.rf,path %&% "_RF_pred_test_labels.csv")

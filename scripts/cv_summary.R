@@ -10,22 +10,22 @@ library(caret)
 library(Hmisc)
 
 #Data Path
-opt = list(
-  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-  CVfiles = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-  sampleName = "CV_summary"
-)
-# command line arguments are parsed
-#option_list = list(
-#  make_option("--CVfiles", type = "character", help = "Path to the file containing the indices of the cross validation."),
-#  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
-#  make_option("--cell_labels", type = "character", help = "Path to the file containing the cell labels."),
-#  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
+#opt = list(
+#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
+#  CVfiles = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
+#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
+#  sampleName = "CV_summary"
 #)
+# command line arguments are parsed
+option_list = list(
+  make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),
+  make_option("--CVfiles", type = "character", help = "Path to the file containing predicted labels."),
+  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
+  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
+)
 
-#opt_parser = OptionParser(option_list = option_list)
-#opt = parse_args(opt_parser)
+opt_parser = OptionParser(option_list = option_list)
+opt = parse_args(opt_parser)
 
 
 # Parameters
