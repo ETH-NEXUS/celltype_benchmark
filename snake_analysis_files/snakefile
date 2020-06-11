@@ -20,7 +20,6 @@ rule evaluate:
     "{output_dir}/evaluation/PopSize/{tool}.csv",
     "{output_dir}/evaluation/Summary/{tool}.csv",
   log: "{output_dir}/evaluation/{tool}.log"
-  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "Rscript evaluate.R "
     "{input.true} "
@@ -56,7 +55,6 @@ rule generate_dropouts_feature_rankings:
         folds = "{output_dir}/CV_folds.RData"
     output: "{output_dir}/rank_genes_dropouts.csv"
     log: "{output_dir}/rank_genes_dropouts.log"
-    singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
     shell:
         "echo test > {wildcards.output_dir}/test\n"
         "python3 rank_gene_dropouts.py "
@@ -136,7 +134,6 @@ rule Garnett_CV:
   log: "{output_dir}/Garnett_CV/Garnett_CV.log"
   params:
     human = "T" if config.get("human", True) else "F"
- # singularity: "docker://scrnaseqbenchmark/garnett:{}".format(dockerTag)
   shell:
     "Rscript Scripts/run_Garnett_CV.R "
     "{input.datafile} "
@@ -167,7 +164,6 @@ rule RF:
   log: "{output_dir}/RF/RF.log"
   params:
     n_features = config.get("number_of_features", 0)
-#  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_RF.py "
     "{input.datafile} "
@@ -193,7 +189,6 @@ rule SVM_rejection:
   log: "{output_dir}/SVM_rejection/SVM_rejection.log"
   params:
     n_features = config.get("number_of_features", 0)
-#  singularity: "docker://scrnaseqbenchmark/baseline:{}".format(dockerTag)
   shell:
     "python3 Scripts/run_SVM_rejection.py "
     "{input.datafile} "
