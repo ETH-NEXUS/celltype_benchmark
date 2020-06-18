@@ -1,0 +1,116 @@
+import os, glob, sys, datetime
+from os import path
+
+####################################################
+
+CV_FOLD_IN = INPUT_DIR
+CV_FOLD_OUT = OUTPUT_DIR + "cv_k_fold"
+
+MARKER_GENES_IN = INPUT_DIR
+MARKER_GENES_OUT = OUTPUT_DIR + "marker_genes"
+
+RF_TRAIN_IN = INPUT_DIR
+RF_TRAIN_OUT = OUTPUT_DIR + "rf/"
+
+SVM_TRAIN_IN = INPUT_DIR
+SVM_TRAIN_OUT = OUTPUT_DIR + "svm/"
+
+GARNETT_TRAIN_IN = INPUT_DIR
+GARNETT_TRAIN_OUT = OUTPUT_DIR + "garnett/"
+
+########################################################
+
+localrules: train_all, cv_summary_train
+rule train_all:
+	input:
+		PREDICTED_TRAIN_OUT + 'cv_summary.tsv'
+	output:
+		OUTPUT_DIR + "complete.txt"
+	shell:
+		'"complete" > complete.txt'
+
+rule cross_validation:
+	input:
+		expand(INPUT_DIR+"{sample}.genes_cells_filtered.corrected.atypical_removed.RDS", sample=sample)
+	output:
+		dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+	shell:
+		config['call']['cross_validation'] + ' {input}'
+
+rule find_markers:
+        input:
+                MARKER_GENES_IN + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS'
+        output:
+                MARKER_GENES_OUT + '{sample}_markers.gmx'
+        shell:
+                config['call']['find_markers'] + ' {input}'
+
+rule convert_markers:
+        input:
+                MARKER_GENES_OUT + '{sample}_markers.gmx'
+        output:
+                MARKER_GENES_OUT + '{sample}_markers_garnett.tsv'
+        shell:
+                config['call']['convert_markers'] + ' {input}'
+
+rule rf_train:
+        input:
+                dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+        output:
+                RF_TRAIN_OUT + '{sample}.model.RDS',
+		PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels.tsv'
+        shell:
+                config['call']['rf_train'] + ' {input}'
+
+rule rf_train_all:
+        input:
+                INPUT_DIR + '{sample}.RDS'
+        output:
+                RF_TRAIN_OUT + '{sample}.model_all.RDS',
+		PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels_all.tsv'
+        shell:
+                config['call']['rf_train'] + ' {input}'
+
+rule svm_train:
+        input:
+                dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+        output:
+                SVM_TRAIN_OUT + '{sample}.model.RDS',
+                PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels.tsv'
+        shell:
+                config['call']['svm_train'] + ' {input}'
+
+rule svm_train_all:
+        input:
+                INPUT_DIR + '{sample}.RDS'
+        output:
+                SVM_TRAIN_OUT + '{sample}.model_all.RDS',
+                PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels_all.tsv'
+        shell:
+                config['call']['svm_train'] + ' {input}'
+
+rule garnett_train:
+        input:
+                dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+        output:
+                GARNETT_TRAIN_OUT + '{sample}.model.RDS',
+                PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels.tsv'
+        shell:
+                config['call']['garnett_train'] + ' {input}'
+
+rule garnett_train_all:
+        input:
+                INPUT_DIR + '{sample}.RDS'
+        output:
+                GARNETT_TRAIN_OUT + '{sample}.model_all.RDS',
+                PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels_all.tsv'
+        shell:
+                config['call']['garnett_train'] + ' {input}'
+
+rule cv_summary_train:
+	input:
+		expand(PREDICTED_TRAIN_OUT + '{sample}.{tools}.predicted_labels.tsv', sample=sample, tools = ['rf','svm','garnett'] )
+	output:
+		PREDICTED_TRAIN_OUT + 'cv_summary.tsv'
+	shell:
+		config['call']['cv_summary'] + ' {input}'

@@ -1,0 +1,69 @@
+import os, glob, sys, datetime
+from os import path
+
+####################################################
+CV_FOLD_OUT = OUTPUT_DIR + "cv_k_fold/"
+
+MARKER_GENES_OUT = OUTPUT_DIR + "marker_genes/"
+
+RF_TEST_IN = OUTPUT_DIR + "rf/"
+RF_TEST_OUT = PREDICTED_TEST_OUT
+
+SVM_TEST_IN = OUTPUT_DIR + "svm/"
+SVM_TEST_OUT = PREDICTED_TEST_OUT
+
+GARNETT_TEST_IN = OUTPUT_DIR + "garnett/"
+GARNETT_TEST_OUT = PREDICTED_TEST_OUT
+
+NEXUS_TEST_OUT = PREDICTED_TEST_OUT
+
+########################################################
+
+rule rf_test:
+        input:
+                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		RF_TEST_IN + '{sample}.model.RDS'
+        output:
+                PREDICTED_TEST_OUT + '{sample}.rf.predicted_labels.tsv'
+        shell:
+              config['call']['rf_test'] + ' {input}'
+
+rule svm_test:
+        input:
+                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		SVM_TEST_IN + '{sample}.model.RDS'
+        output:
+                SVM_TEST_OUT + '{sample}.model.RDS',
+                PREDICTED_TEST_OUT + '{sample}.svm.predicted_labels.tsv'
+        shell:
+                config['call']['svm_test'] + ' {input}'
+
+rule garnett_test:
+        input:
+                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		GARNETT_TEST_IN + '{sample}.model.RDS',
+		MARKER_GENES_OUT + "{sample}_markers_garnett.tsv"
+        output:
+                GARNETT_TEST_OUT + '{sample}.model.RDS',
+                PREDICTED_TEST_OUT + '{sample}.garnett.predicted_labels.tsv'
+        shell:
+                config['call']['garnett_test'] + ' {input}'
+
+rule nexus_test:
+        input:
+                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		MARKER_GENES_OUT + "{sample}_markers.gmx"
+        output:
+                NEXUS_TEST_OUT + '{sample}.model.RDS',
+		PREDICTED_TEST_OUT + '{sample}.nexus.predicted_labels.tsv'
+        shell:
+                config['call']['nexus_test'] + '{input}'
+
+rule cv_summary_test:
+        input:
+                expand(PREDICTED_TEST_OUT + '{sample}.{tools}.predicted_labels.tsv', sample=sample, tools = ['rf','svm','garnett','nexus'] )
+        output:
+                PREDICTED_TEST_OUT + '{sample}.cv_summary.tsv'
+        shell:
+                config['call']['cv_summary'] + ' {input}'
+
