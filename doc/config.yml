@@ -1,0 +1,106 @@
+input_output:
+    sample_map: "/path/to/samplemap"
+    sample_id: "sample_name"
+    output_dir: "/path/to/output/"
+    tmp_dir: "/path/to/tmp/"
+
+
+resources:
+    conda_path: ""
+    snakemake_path: ""
+
+
+statistics:
+
+  cross_validation:
+    call: "/cluster/project/nexus/benchmarking/celltyping/git/scripts/cv_k_folds.R"
+    scratch: "1000"
+    mem: "1000"
+    time: "200"
+    threads: 1
+    k_folds: 10
+
+  calc_accuracy:
+    call: ""
+    scratch: ""
+    mem: ""
+    time: ""
+    threads: 1
+
+  plot_stats:
+    call: ""
+    scratch: ""
+    mem: ""
+    time: ""
+    threads: 1
+
+
+markers:
+
+  find_markers:
+    call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/MarkerGeneList.R"
+    scratch: "1000"
+    mem: "1000"
+    time: "200"
+    threads: 1
+
+  convert_markers:
+    call: "python /cluster/project/nexus/benchmarking/celltyping/git/scripts/convert_marker_file.py"
+    scratch: "1000"
+    mem: "1000"
+    time: "200"
+    threads: 1
+
+
+methods:
+
+  rf:
+    train:
+      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_rf.R"
+      scratch: "1000"
+      mem: "1000"
+      time: "200"
+      threads: 1
+    test:
+      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_rf.R"
+      scratch: "1000"
+      mem: "1000"
+      time: "200"
+      threads: 1
+
+  svm:
+    train:
+      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_svm.R"
+      scratch: "1000"
+      mem: "1000"
+      time: "200"
+      threads: 1
+    test:
+      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_svm.R"
+      scratch: "1000"
+      mem: "1000"
+      time: "200"
+      threads: 1
+
+  garnett:
+    train: 
+      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_garnett.R"
+      scratch: "1000"
+      mem: "1000"
+      time: "200"
+      threads: 1
+    test:
+      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_garnett.R"
+      scratch: "1000"
+      mem: "1000"
+      time: "200"
+      threads: 1
+    conda: "/cluster/project/nexus/benchmarking/celltyping/docs/conda_envs/garnett.yaml"
+
+  nexus:
+    test:
+      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_nexus.R"
+      scratch: "1000"
+      mem: "1000"
+      time: "200"
+      threads: 1

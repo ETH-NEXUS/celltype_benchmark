@@ -24,8 +24,16 @@ list("cell_type1" = c("gene1","gene2"))
 
 """
 #%%
-marker_file_path = "/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/mel_required_celltypes_PBMC.gmx"
+import argparse
 
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--input_gmx', metavar='type=string',
+                    help='Input path to gene marker file in .gmx format to be converted.')
+parser.add_argument('--output_tsv', help='Output path to converted .tsv gene marker file.')
+opt = parser.parse_args()
+
+gmx_path = opt.input_gmx
+tsv_path = opt.output_tsv
 #%%
 def read_marker_file(marker_file_path):
     marker_file = open(marker_file_path,"r").read()
@@ -43,7 +51,7 @@ def read_marker_file(marker_file_path):
 #%%
 # Simple conversion to Garnett format
 def write_garnett(identity_genes):
-    out_file = open("/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_Garnett_markers.txt","w")
+    out_file = open(tsv_path,"w")
     for k,v in identity_genes.items():
         if "(" in k or ")" in k:
             pop_name = str(k).replace("(","_")
@@ -55,18 +63,17 @@ def write_garnett(identity_genes):
     out_file.close()
 #%%
 def write_cellassign(identity_genes):
-    out_file = open("/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_CellAssign_markers.txt","w")
+    out_file = open(tsv_path,"w")
     out_file.write(str(list(marker_dict.keys()))+"\n")
     for v in marker_dict.values():
         out_file.write(",".join(v)+"\n")
     out_file.close()
 #%%
 def write_generic_markerfile(identity_genes):
-    out_file = open("/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_markers.txt","w")
+    out_file = open(tsv_path,"w")
     for k,v in identity_genes.items():
         out_file.write(k+","+",".join(v)+"\n")
     out_file.close()
 #%%
 marker_dict = read_marker_file(marker_file_path)
-write_cellassign(marker_dict)
 write_generic_markerfile(marker_dict)

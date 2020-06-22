@@ -17,13 +17,14 @@ library(caret)
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),
   make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
+  make_option("--k_folds", type = "float", help = "Number of folds for cross-validation. Default: 10", default = 10)
 )
 
 opt_parser = OptionParser(option_list = option_list)
 opt = parse_args(opt_parser)
 
 # Parameters
-Kfold <- 10
+Kfold <- opt$k_folds
 
 ################################################################################
 ## main code starts here

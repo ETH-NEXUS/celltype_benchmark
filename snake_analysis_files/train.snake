@@ -2,7 +2,16 @@ import os, glob, sys, datetime
 from os import path
 
 ####################################################
+configfile: 'config.yml'
+include: 'misc_snake.py'
+###################################################
+SAMPLE_MAPPING = config['sample_map']
+sample = get_sample_names()
 
+INPUT_DIR = config['dirs']['input']
+OUTPUT_DIR = config['dirs']['output']
+TMP_DIR = config['dirs']['temp']
+####################################################
 CV_FOLD_IN = INPUT_DIR
 CV_FOLD_OUT = OUTPUT_DIR + "cv_k_fold"
 
@@ -18,49 +27,110 @@ SVM_TRAIN_OUT = OUTPUT_DIR + "svm/"
 GARNETT_TRAIN_IN = INPUT_DIR
 GARNETT_TRAIN_OUT = OUTPUT_DIR + "garnett/"
 
+PREDICTED_TRAIN_OUT = OUTPUT_DIR + "cv_train_summary/"
 ########################################################
 
-localrules: train_all, cv_summary_train
-rule train_all:
+localrules: all, cv_summary_train
+rule all:
 	input:
-		PREDICTED_TRAIN_OUT + 'cv_summary.tsv'
+		expand(MARKER_GENES_OUT + '{sample}_markers.gmx', sample = sample),
+                expand(PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels.tsv', sample = sample),
+                expand(PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels_all.tsv', sample = sample),
+                expand(PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels.tsv', sample = sample),
+                expand(PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels_all.tsv', sample = sample),
+                expand(PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels.tsv', sample = sample),
+                expand(PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels_all.tsv', sample = sample),
+                expand(PREDICTED_TRAIN_OUT + 'cv_summary.tsv', sample = sample)
 	output:
 		OUTPUT_DIR + "complete.txt"
-	shell:
-		'"complete" > complete.txt'
+	params:
+                lsfoutfile = '{sample}.train_run.lsfout.log',
+                lsferrfile = '{sample}.train_run.lsferr.log',
+        benchmark:
+                'train_run.benchmark'
+        shell:
+		' date > {output}'
 
 rule cross_validation:
 	input:
 		expand(INPUT_DIR+"{sample}.genes_cells_filtered.corrected.atypical_removed.RDS", sample=sample)
 	output:
-		dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+		dynamic(CV_FOLD_OUT + '{sample}.index{k_fold}.RDS'),
+                output_dir = CV_FOLD_OUT
+        params:
+                lsfoutfile = '{sample}.cv.lsfout.log',
+                lsferrfile = '{sample}.cv.lsferr.log',
+                scratch = config['statistics']['cross_validation']['scratch'],
+                mem = config['tools']['cross_validation']['mem'],
+                time = config['tools']['cross_validation']['time'],
+                params = config['tools']['cross_validation']['params']
+        benchmark:
+                'cross_validation.benchmark'
+        threads:
+                config['tools']['cross_validation']['threads']
+
 	shell:
-		config['call']['cross_validation'] + ' {input}'
+		config['call']['cross_validation'] + ' --SCE {input} --outputDirec {output_dir}'
 
 rule find_markers:
         input:
                 MARKER_GENES_IN + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS'
         output:
-                MARKER_GENES_OUT + '{sample}_markers.gmx'
+                gmx_out = MARKER_GENES_OUT + '{sample}_markers.gmx',
+                output_dir = MARKER_GENES_OUT        
+        params:
+                lsfoutfile = '{sample}.find_markers.lsfout.log',
+                lsferrfile = '{sample}.find_markers.lsferr.log',
+                scratch = config['tools']['find_markers']['scratch'],
+                mem = config['tools']['find_markers']['mem'],
+                time = config['tools']['find_markers']['time'],
+                params = config['tools']['find_markers']['params']
+        benchmark:
+                'find_markers.benchmark'
+        threads:
+                config['tools']['find_markers']['threads']
+
         shell:
-                config['call']['find_markers'] + ' {input}'
+                config['call']['find_markers'] + ' --SCE {input} --outputDirec {output.output_dir}  --sampleName {sample}'
 
 rule convert_markers:
         input:
                 MARKER_GENES_OUT + '{sample}_markers.gmx'
         output:
                 MARKER_GENES_OUT + '{sample}_markers_garnett.tsv'
+        params:
+                lsfoutfile = '{sample}.convert_markers.lsfout.log',
+                lsferrfile = '{sample}.convert_markers.lsferr.log',
+                scratch = config['tools']['convert_markers']['scratch'],
+                mem = config['tools']['convert_markers']['mem'],
+                time = config['tools']['convert_markers']['time'],
+                params = config['tools']['convert_markers']['params']
+        benchmark:
+                'convert_markers.benchmark'
+        threads:
+                config['tools']['convert_markers']['threads']
         shell:
-                config['call']['convert_markers'] + ' {input}'
+                config['call']['convert_markers'] + ' --gmx_file {input} --tsv_file {output}'
 
 rule rf_train:
         input:
-                dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+                dynamic(CV_FOLD_OUT + '{sample}.index{k_fold}.RDS')
         output:
                 RF_TRAIN_OUT + '{sample}.model.RDS',
 		PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels.tsv'
+        params:
+                lsfoutfile = '{sample}.rf_train.lsfout.log',
+                lsferrfile = '{sample}.rf_train.lsferr.log',
+                scratch = config['tools']['rf_train']['scratch'],
+                mem = config['tools']['rf_train']['mem'],
+                time = config['tools']['rf_train']['time'],
+                params = config['tools']['rf_train']['params']
+        benchmark:
+                'rf_train.benchmark'
+        threads:
+                config['tools']['rf_train']['threads']
         shell:
-                config['call']['rf_train'] + ' {input}'
+                config['call']['svm_train'] + ' --SCE {input} --model_dir {output.model_dir} --pred_labels_out {output.pred_labels}'
 
 rule rf_train_all:
         input:
@@ -68,17 +138,39 @@ rule rf_train_all:
         output:
                 RF_TRAIN_OUT + '{sample}.model_all.RDS',
 		PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels_all.tsv'
+        params:
+                lsfoutfile = '{sample}.rf_train_all.lsfout.log',
+                lsferrfile = '{sample}.rf_train_all.lsferr.log',
+                scratch = config['tools']['rf_train']['scratch'],
+                mem = config['tools']['rf_train']['mem'],
+                time = config['tools']['rf_train']['time'],
+                params = config['tools']['rf_train']['params']
+        benchmark:
+                'rf_train_all.benchmark'
+        threads:
+                config['tools']['rf_train']['threads']
         shell:
-                config['call']['rf_train'] + ' {input}'
+                config['call']['rf_train'] + ' --SCE {input} --model_dir {output.model_dir} --pred_labels_out {output.pred_labels}'
 
 rule svm_train:
         input:
-                dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+                dynamic(CV_FOLD_OUT + '{sample}.index{k_fold}.RDS')
         output:
                 SVM_TRAIN_OUT + '{sample}.model.RDS',
                 PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels.tsv'
+        params:
+                lsfoutfile = '{sample}.svm_train.lsfout.log',
+                lsferrfile = '{sample}.svm_train.lsferr.log',
+                scratch = config['tools']['svm_train']['scratch'],
+                mem = config['tools']['svm_train']['mem'],
+                time = config['tools']['svm_train']['time'],
+                params = config['tools']['svm_train']['params']
+        benchmark:
+                'svm_train.benchmark'
+        threads:
+                config['tools']['svm_train']['threads']
         shell:
-                config['call']['svm_train'] + ' {input}'
+                config['call']['svm_train'] + ' --SCE {input} --model_dir {output.model_dir} --pred_labels_out {output.pred_labels}'
 
 rule svm_train_all:
         input:
@@ -86,31 +178,78 @@ rule svm_train_all:
         output:
                 SVM_TRAIN_OUT + '{sample}.model_all.RDS',
                 PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels_all.tsv'
+        params:
+                lsfoutfile = '{sample}.svm_train_all.lsfout.log',
+                lsferrfile = '{sample}.svm_train_all.lsferr.log',
+                scratch = config['tools']['svm_train']['scratch'],
+                mem = config['tools']['svm_train']['mem'],
+                time = config['tools']['svm_train']['time'],
+                params = config['tools']['svm_train']['params']
+        benchmark:
+                'svm_train_all.benchmark'
+        threads:
+                config['tools']['svm_train']['threads']
         shell:
-                config['call']['svm_train'] + ' {input}'
+                config['call']['svm_train'] + ' --SCE {input} --model_dir {output.model_dir} --pred_labels_out {output.pred_labels}'
 
 rule garnett_train:
         input:
-                dynamic(CV_FOLD_OUT + '{sample}.{k_fold}.RDS')
+                dynamic(CV_FOLD_OUT + '{sample}.index{k_fold}.RDS')
         output:
-                GARNETT_TRAIN_OUT + '{sample}.model.RDS',
-                PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels.tsv'
+                model_dir = GARNETT_TRAIN_OUT + '{sample}.model.RDS',
+                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels.tsv'
+        params:
+                lsfoutfile = '{sample}.garnett_train.lsfout.log',
+                lsferrfile = '{sample}.garnett_train.lsferr.log',
+                scratch = config['tools']['garnett_train']['scratch'],
+                mem = config['tools']['garnett_train']['mem'],
+                time = config['tools']['garnett_train']['time'],
+                params = config['tools']['garnett_train']['params']
+        benchmark:
+                'garnett_train.benchmark'
+        threads:
+                config['tools']['garnett_train']['threads']
         shell:
-                config['call']['garnett_train'] + ' {input}'
+                config['call']['garnett_train'] + ' --sce {input} --model_dir {output.model_dir} --pred_labels_out {output.pred_labels}'
 
 rule garnett_train_all:
         input:
                 INPUT_DIR + '{sample}.RDS'
         output:
-                GARNETT_TRAIN_OUT + '{sample}.model_all.RDS',
-                PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels_all.tsv'
+                model_dir = GARNETT_TRAIN_OUT + '{sample}.model_all.RDS',
+                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels_all.tsv'
+        params:
+                lsfoutfile = '{sample}.garnett_train_all.lsfout.log',
+                lsferrfile = '{sample}.garnett_train_all.lsferr.log',
+                scratch = config['tools']['garnett_train']['scratch'],
+                mem = config['tools']['garnett_train']['mem'],
+                time = config['tools']['garnett_train']['time'],
+                params = config['tools']['garnett_train']['params']
+        benchmark:
+                'garnett_train_all.benchmark'
+        threads:
+                config['tools']['garnett_train']['threads']
         shell:
-                config['call']['garnett_train'] + ' {input}'
+                config['call']['garnett_train'] + ' --sce {input} --model_dir {output.model_dir} --pred_labels_out {output.pred_labels}'
 
 rule cv_summary_train:
 	input:
-		expand(PREDICTED_TRAIN_OUT + '{sample}.{tools}.predicted_labels.tsv', sample=sample, tools = ['rf','svm','garnett'] )
+		cv_files = expand(PREDICTED_TRAIN_OUT + '{sample}.{tools}.predicted_labels.tsv', sample=sample, tools = ['rf','svm','garnett'] ),
+                sce = CV_FOLD_OUT + "{sample}.indexAll.RDS",
+                output_dir = CV_SUMMARY_OUT,
+		sample_name = "{sample}"
 	output:
 		PREDICTED_TRAIN_OUT + 'cv_summary.tsv'
+        params:
+                lsfoutfile = '{sample}.cv_summary.lsfout.log',
+                lsferrfile = '{sample}.cv_summary.lsferr.log',
+                scratch = config['tools']['cv_summary']['scratch'],
+                mem = config['tools']['cv_summary']['mem'],
+                time = config['tools']['cv_summary']['time'],
+                params = config['tools']['cv_summary']['params']
+        benchmark:
+                'cv_summary.benchmark'
+        threads:
+                config['tools']['cv_summary']['threads']
 	shell:
-		config['call']['cv_summary'] + ' {input}'
+		config['call']['cv_summary'] + ' --CVfiles {input.cv_files} --SCE {input.sce} --outputDirec {input.output_dir} --sampleName {input.sample_name}'
