@@ -14,7 +14,7 @@ TMP_DIR = config['input_output']['tmp_dir']
 ####################################################
 k_fold_index = list(range(1, config['statistics']['cross_validation']['k_folds'] + 1))
 #selected_tools = config['resources']['tools']
-selected_tools = ['rf','svm','garnett']
+selected_tools = ['rf','svm']
 ####################################################
 CV_FOLD_IN = INPUT_DIR
 CV_FOLD_OUT = OUTPUT_DIR + "cv_k_index/" #add slashes to dir ends for consistency
@@ -47,7 +47,7 @@ rule all:
         input:
                 #expand(INPUT_DIR + '{sample}.genes_cells_filtered.corrected.RDS', sample = sample_names),
                 expand(MARKER_GENES_OUT + '{sample}_markers.gmx', sample = sample_names), #see which inputs are necessary; maybe only keep all/cv_summary
-                expand(PREDICTED_TRAIN_OUT + '{sample}.{method}.predicted_labels_index{k_index}.tsv', sample = sample_names, method = selected_tools, k_index = k_fold_index),
+                expand(PREDICTED_TRAIN_OUT + '{sample}.{method}.predicted_labels_indexFold{k_index}.tsv', sample = sample_names, method = selected_tools, k_index = k_fold_index),
                 expand(PREDICTED_TRAIN_OUT + '{sample}.{method}.predicted_labels_all.tsv', sample = sample_names, method = selected_tools),
                 #expand(PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels.tsv', sample = sample_names),
                 #expand(PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels_all.tsv', sample = sample_names),
@@ -58,7 +58,7 @@ rule all:
                 #expand(GARNETT_TRAIN_OUT + '{sample}.model.RDS', sample = sample_names),
                 expand(PREDICTED_TRAIN_OUT + '{sample}.cv_summary.tsv', sample = sample_names),
                 expand(CV_FOLD_OUT + "{sample}.indexAll.RDS", sample = sample_names),
-                expand(CV_FOLD_OUT + "{sample}.index{k_index}.RDS", sample = sample_names, k_index = k_fold_index),
+                expand(CV_FOLD_OUT + "{sample}.indexFold{k_index}.RDS", sample = sample_names, k_index = k_fold_index),
                 #expand(PREDICTED_TRAIN_OUT + '{sample}.cv_summary.lsfout.log', sample = sample_names),
                 #expand(PREDICTED_TRAIN_OUT + '{sample}.cv_summary.lsferr.log', sample = sample_names)
         output:
@@ -69,11 +69,11 @@ rule all:
         shell:
                 ' date > {output}'
 
-rule cross_validation:
+rule cross_validation: #WARNING: output currently not including sample name
         input:
                 sce_in = CV_FOLD_IN + "{sample}.genes_cells_filtered.corrected.RDS" # use variables for single inputs for clarity/readability
         output:
-                barcodes_out = CV_FOLD_OUT + '{sample}.index{k_index}.RDS', #note: barcode list
+                barcodes_out = CV_FOLD_OUT + '{sample}.indexFold{k_index}.RDS', #note: barcode list
         params:
                 lsfoutfile = CV_FOLD_OUT + '{sample}.cv.lsfout.log', #change all lsf/benchmark paths to incl. specific output dir
                 lsferrfile = CV_FOLD_OUT + '{sample}.cv.lsferr.log',
@@ -128,10 +128,10 @@ rule convert_markers:
 rule rf_train:
         input:
                 sce_in =  RF_TRAIN_IN + '{sample}.genes_cells_filtered.corrected.RDS',
-                barcodes = CV_FOLD_OUT + '{sample}.index{k_index}.RDS'
+                barcodes = CV_FOLD_OUT + '{sample}.indexFold{k_index}.RDS'
         output:
                 #model_dir = RF_TRAIN_OUT + '{sample}.model.RDS',
-                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels_index{k_index}.tsv'
+                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels_indexFold{k_index}.tsv'
         params:
                 lsfoutfile = RF_TRAIN_OUT + 'rf_train.lsfout.log',
                 lsferrfile = RF_TRAIN_OUT + 'rf_train.lsferr.log',
@@ -144,7 +144,7 @@ rule rf_train:
         threads:
                 config['methods']['rf']['train']['threads']
         shell:
-                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CV_index {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
 
 rule rf_train_all:
         input:
@@ -165,15 +165,15 @@ rule rf_train_all:
         threads:
                 config['methods']['rf']['train']['threads']
         shell:
-                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CV_index {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
 
 rule svm_train:
         input:
                 sce_in =  SVM_TRAIN_IN + '{sample}.genes_cells_filtered.corrected.RDS',
-                barcodes = CV_FOLD_OUT + '{sample}.index{k_index}.RDS'
+                barcodes = CV_FOLD_OUT + '{sample}.indexFold{k_index}.RDS'
         output:
                 #SVM_TRAIN_OUT + '{sample}.model.RDS',
-                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels_index{k_index}.tsv'
+                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels_indexFold{k_index}.tsv'
         params:
                 lsfoutfile = SVM_TRAIN_OUT + '{sample}.svm_train.lsfout.log',
                 lsferrfile = SVM_TRAIN_OUT + '{sample}.svm_train.lsferr.log',
@@ -186,7 +186,7 @@ rule svm_train:
         threads:
                 config['methods']['svm']['train']['threads']
         shell:
-                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CV_index {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
 
 rule svm_train_all:
         input:
@@ -207,15 +207,15 @@ rule svm_train_all:
         threads:
                 config['methods']['svm']['train']['threads']
         shell:
-                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CV_index {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
 
 rule garnett_train:
         input:
                 sce_in =  GARNETT_TRAIN_IN + '{sample}.genes_cells_filtered.corrected.RDS',
-                barcodes = CV_FOLD_OUT + '{sample}.index{k_index}.RDS'
+                barcodes = CV_FOLD_OUT + '{sample}.indexFold{k_index}.RDS'
         output:
                 #model_dir = GARNETT_TRAIN_OUT + '{sample}.model.RDS',
-                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels_index{k_index}.tsv' # all tool output tsvs need to be present at same time for cv_summary
+                pred_labels = PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels_indexFold{k_index}.tsv' # all tool output tsvs need to be present at same time for cv_summary
         params:
                 lsfoutfile = GARNETT_TRAIN_OUT + '{sample}.garnett_train.lsfout.log',
                 lsferrfile = GARNETT_TRAIN_OUT + '{sample}.garnett_train.lsferr.log',
@@ -250,7 +250,7 @@ rule garnett_train_all:
         threads:
                 config['methods']['garnett']['train']['threads']
         conda:
-                config['methods']['garnett']['conda']$
+                config['methods']['garnett']['conda']
         shell:
                 config['methods']['garnett']['train']['call'] + ' --sce {input.sce_in} --output_dir {params.output_dir} --pred_labels_out     {output.pred_labels} --sample_name {params.sample_name}'
 
@@ -259,7 +259,7 @@ rule garnett_train_all:
 #predicted_labels = for ... in PREDICTED_TRAIN_OUT
 
 #def get_tsv_files(tools):
-#        return expand(PREDICTED_TRAIN_OUT + wildcards.sample + '.{method}.predicted_labels_index{k_index}.tsv', method = tools)
+#        return expand(PREDICTED_TRAIN_OUT + wildcards.sample + '.{method}.predicted_labels_indexFold{k_index}.tsv', method = tools)
 
 #tsv_files = get_tsv_files(selected_tools)
 #print(tsv_files)
@@ -268,7 +268,7 @@ TSV_FILES = [file.split(".") for file in glob.glob(PREDICTED_TRAIN_OUT + ".tsv")
 
 rule cv_summary_train:
         input:
-                #cv_files = PREDICTED_TRAIN_OUT + '{sample}.{method}.predicted_labels_index{k_index}.tsv', #use hyperfxn
+                #cv_files = PREDICTED_TRAIN_OUT + '{sample}.{method}.predicted_labels_indexFold{k_index}.tsv', #use hyperfxn
                 cv_files = TSV_FILES,
                 sce_in = CV_FOLD_OUT + "{sample}.indexAll.RDS"
         output:
