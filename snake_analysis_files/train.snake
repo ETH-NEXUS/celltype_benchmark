@@ -12,7 +12,7 @@ INPUT_DIR = config['input_output']['input_dir']
 OUTPUT_DIR = config['input_output']['output_dir']
 TMP_DIR = config['input_output']['tmp_dir']
 ####################################################
-k_fold_index = range(1, config['statistics']['cross_validation']['k_folds'])
+k_fold_index = list(range(1, config['statistics']['cross_validation']['k_folds'] + 1))
 print(k_fold_index)
 #selected_tools = config['resources']['tools']
 selected_tools = ['rf','svm','garnett']
@@ -141,7 +141,7 @@ rule rf_train:
 
 rule rf_train_all:
         input:
-                sce_in = RF_TRAIN_IN + '{sample}.RDS'
+                sce_in = RF_TRAIN_IN + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS'
         output:
                 RF_TRAIN_OUT + '{sample}.model_all.RDS',
                 PREDICTED_TRAIN_OUT + '{sample}.rf.predicted_labels_all.tsv'
@@ -178,7 +178,7 @@ rule svm_train:
 
 rule svm_train_all:
         input:
-                sce_in = SVM_TRAIN_IN + '{sample}.RDS'
+                sce_in = SVM_TRAIN_IN + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS'
         output:
                 SVM_TRAIN_OUT + '{sample}.model_all.RDS',
                 PREDICTED_TRAIN_OUT + '{sample}.svm.predicted_labels_all.tsv'
@@ -215,7 +215,7 @@ rule garnett_train:
 
 rule garnett_train_all:
         input:
-                sce_in = GARNETT_TRAIN_IN + '{sample}.RDS'
+                sce_in = GARNETT_TRAIN_IN + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS'
         output:
                 model_dir = GARNETT_TRAIN_OUT + '{sample}.model_all.RDS',
                 pred_labels = PREDICTED_TRAIN_OUT + '{sample}.garnett.predicted_labels_all.tsv'
@@ -247,7 +247,7 @@ rule cv_summary_train:
         input:
                 #cv_files = PREDICTED_TRAIN_OUT + '{sample}.{method}.predicted_labels_index{k_index}.tsv', #use hyperfxn
                 cv_files = TSV_FILES,
-                sce_in = CV_FOLD_OUT + "{sample}.indexAll.RDS",
+                sce_in = expand(CV_FOLD_OUT + "{sample}.indexAll.RDS", sample = sample_names)
         output:
                 PREDICTED_TRAIN_OUT + 'cv_summary.tsv'
         params:
@@ -258,7 +258,7 @@ rule cv_summary_train:
                 time = config['statistics']['cv_summary']['time'],
                 params = config['statistics']['cv_summary']['params'],
                 output_dir = CV_SUMMARY_OUT,
-                sample_name = "{sample}"
+                sample_name = "{wildcards.sample}"
         threads:
                 config['statistics']['cv_summary']['threads']
         shell:
