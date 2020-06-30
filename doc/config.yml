@@ -54,7 +54,7 @@ statistics:
 markers:
 
   find_markers:
-    call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/MarkerGeneList.R"
+    call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/MarkerGeneList.R"
     scratch: "1000"
     mem: "1000"
     time: "200"
@@ -74,14 +74,14 @@ methods:
 
   rf:
     train:
-      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_rf.R"
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_rf.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
     test:
-      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_rf.R"
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_rf.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -90,14 +90,14 @@ methods:
 
   svm:
     train:
-      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_svm.R"
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_svm.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
     test:
-      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_svm.R"
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_svm.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -106,14 +106,14 @@ methods:
 
   garnett:
     train: 
-      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_garnett.R"
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_garnett.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
     test:
-      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_garnett.R"
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_garnett.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -123,7 +123,7 @@ methods:
 
   nexus:
     test:
-      call: "R /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_nexus.R"
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_nexus.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
