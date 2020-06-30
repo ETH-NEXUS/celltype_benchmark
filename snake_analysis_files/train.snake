@@ -13,7 +13,6 @@ OUTPUT_DIR = config['input_output']['output_dir']
 TMP_DIR = config['input_output']['tmp_dir']
 ####################################################
 k_fold_index = list(range(1, config['statistics']['cross_validation']['k_folds'] + 1))
-print(k_fold_index)
 #selected_tools = config['resources']['tools']
 selected_tools = ['rf','svm','garnett']
 ####################################################
