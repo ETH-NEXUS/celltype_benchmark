@@ -1,11 +1,7 @@
 input_output:
-    #sample_map: "/path/to/samplemap"
-    sample_id: "sample_name"
-   # input_dir: "/path/to/input/"
-   # output_dir: "/path/to/output/"
-    sample_map: "/Users/mlindberg/Documents/celltype_benchmark_run/input/sample_map.tsv"
-    input_dir: "/Users/mlindberg/Documents/celltype_benchmark_run/input/"
-    output_dir: "/Users/mlindberg/Documents/celltype_benchmark_run/"
+    sample_map: "/path/to/samplemap"
+    input_dir: "/path/to/input/"
+    output_dir: "/path/to/output/"
     tmp_dir: "/path/to/tmp/"
 
 

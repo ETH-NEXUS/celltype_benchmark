@@ -1,0 +1,61 @@
+import os, glob, sys, datetime
+from os import path
+
+# This function adapts the config object to include full path information
+include: "misc_snake.py"
+
+# input files and folders
+SAMPLEMAPPING = config['input_output']['sample_map']
+INPUTDIR = config['input_output']['input_dir']
+OUTDIR = config['input_output']['output_dir']
+TMPDIR = config['input_output']['tmp_dir']
+
+# Check if the uses specified the proper input and output directories
+if not 'INPUTDIR' in globals():
+    print('You have to specify the root directory of the input files!')
+    sys.exit(1)
+if not 'OUTDIR' in globals():
+    print('You have to specify the root directory where the results will be generated!')
+    sys.exit(1)
+if not 'TMPDIR' in globals():
+    print('You have to specify the root directory where temporary files will be stored!')
+    sys.exit(1)
+
+
+K_FOLD_INDEX = list(range(1, config['statistics']['cross_validation']['k_folds'] + 1))
+SELECTED_METHODS = ['rf','svm']
+
+print(K_FOLD_INDEX)
+print(SELECTED_METHODS)
+print(get_sample_names())
+####################################################
+CV_FOLD_IN = INPUTDIR
+CV_FOLD_OUT = OUTDIR + "cv_k_index/"
+
+MARKER_GENES_IN = INPUTDIR
+MARKER_GENES_OUT = OUTDIR + "marker_genes/"
+
+METHOD_TRAIN_IN = CV_FOLD_OUT
+METHOD_TRAIN_OUT = OUTDIR + "crossvalidation/"
+
+METHOD_ALL_TRAIN_OUT = OUTDIR + "trained_model/"
+
+# Include the rules
+include: "training_rules.py"
+
+localrules: all
+rule all:
+	input:
+		expand(MARKER_GENES_OUT + '{sample}.markers.gmx', sample = get_sample_names()),
+		expand(METHOD_ALL_TRAIN_OUT + '{sample}.{method}_predicted_labels_all.tsv', sample = get_sample_names(), method = SELECTED_METHODS),
+		expand(METHOD_TRAIN_OUT + '{sample}.cv_summary.tsv', sample = get_sample_names())
+	output:
+		OUTDIR + "complete_training.txt"
+	params:
+		lsfoutfile = expand(OUTDIR + 'complete_training.lsfout.log'),
+		lsferrfile = expand(OUTDIR + 'complete_training.lsferr.log')
+	benchmark:
+		OUTDIR + 'complete_training.txt.benchmark'
+	shell:
+		'date > {output}'
+
