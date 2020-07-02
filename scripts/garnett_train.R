@@ -7,8 +7,8 @@ library(garnett)
 library(org.Hs.eg.db)
 
 option_list = list(
-  make_option("--sce", type = "character", help = "Path to RDS file with sce object stored inside."),
-  make_option("--barcodes_index", type = "character", help = "Path to RDS file w/ train data barcodes."),
+  make_option("--cds", type = "character", help = "Path to RDS file with CDS data object."),
+  make_option("--barcodes_index", type = "character", help = "Path to RDS file w/ train & test data barcodes."),
   make_option("--output_dir", type = "character", help = "Path to the directory where output files will be written."),
   make_option("--sample_name", type = "character", help = "Sample identifier. Attached to each output name."),
 )
@@ -16,24 +16,24 @@ option_list = list(
 opt_parser = OptionParser(option_list = option_list)
 opt = parse_args(opt_parser)
 
-sce <- readRDS(opt$sce)
+cds <- readRDS(opt$cds)
 barcodes_selected <- readRDS(opt$barcodes_index)
-sce <- estimate_size_factors(sce)
+cds <- estimate_size_factors(cds)
 
 #Convert SCE to Cell_Data_Set (Monocle format)
-sce <- monocle3::new_cell_data_set(expression_data=t(sce@assays$data$counts))
+cds <- monocle3::new_cell_data_set(expression_data=t(cds@assays$data$counts))
 # To-do: add metadata
-sce <- monocle3::new_cell_data_set(expression_data=sce@assays$data$counts)
-monocle3::fData(sce)$gene_id <- row.names(sce)
+cds <- monocle3::new_cell_data_set(expression_data=cds@assays$data$counts)
+monocle3::fData(cds)$gene_id <- row.names(cds)
 features <- read.table("/cluster/project/nexus/benchmarking/celltyping/test_pilot/cellranger_run/zheng_sorted_merged/outs/filtered_feature_bc_matrix/features.tsv.gz")
 features <- features[1:2]
 names(features) <- c("gene_id","gene_short_name")
-match_index <- match(row.names(sce), features$gene_id)
-monocle3::fData(sce)$gene_short_name <- features$gene_short_name[match_index]
+match_index <- match(row.names(cds), features$gene_id)
+monocle3::fData(cds)$gene_short_name <- features$gene_short_name[match_index]
 ######### Garnett run ##########    
 print("Starting training...")
 start_train <- Sys.time()
-garnett_classifier <- train_cell_classifier(cds = sce[,barcodes_selected$train], 
+garnett_classifier <- train_cell_classifier(cds = cds[,barcodes_selected$train], 
                                            marker_file = opt$marker_file,
                                            db=org.Hs.eg.db,
                                            cds_gene_id_type = "SYMBOL",
@@ -46,7 +46,7 @@ write.csv(train_time,paste0(opt$output_dir, opt$sample_name,'/garnett_training_t
 
 print("Testing classifier; generating predicted labels...")
 start_test <- Sys.time()
-garnett_test <- classify_cells(sce[,barcodes_selected$test],
+garnett_test <- classify_cells(cds[,barcodes_selected$test],
                                   garnett_classifier,
                                   db = org.Hs.eg.db,
                                   cluster_extend = TRUE,
@@ -56,7 +56,7 @@ end_test <- Sys.time()
 test_time <- as.numeric(end_test - start_test)
 print("Prediction complete.")
 print("Saving predicted labels...")
-pred_labels <- list(pData(sce)$cluster_ext_type)
+pred_labels <- list(pData(cds)$cluster_ext_type)
 write.csv(pred_labels,paste0(opt$output_dir, opt$sample_name, '/garnett_pred_label.csv'),row.names = FALSE)
 write.csv(test_time,paste0(opt$output_dir, opt$sample_name, '/garnett_CV_test_time.csv'),row.names = FALSE)
 print("Labels saved.")
