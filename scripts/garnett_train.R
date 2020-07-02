@@ -8,6 +8,7 @@ library(org.Hs.eg.db)
 
 option_list = list(
   make_option("--sce", type = "character", help = "Path to RDS file with sce object stored inside."),
+  make_option("--barcodes_index", type = "character", help = "Path to RDS file w/ train data barcodes."),
   make_option("--output_dir", type = "character", help = "Path to the directory where output files will be written."),
   make_option("--sample_name", type = "character", help = "Sample identifier. Attached to each output name."),
 )
@@ -16,18 +17,40 @@ opt_parser = OptionParser(option_list = option_list)
 opt = parse_args(opt_parser)
 
 sce <- readRDS(opt$sce)
+barcodes_selected <- readRDS(opt$barcodes_index)
 sce <- estimate_size_factors(sce)
+
     
 print("Starting training...")
 start_train <- Sys.time()
-garnett_classifier <- train_cell_classifier(cds = sce, 
+garnett_classifier <- train_cell_classifier(cds = sce[,barcodes_selected$train], 
                                            marker_file = opt$marker_file,
                                            db=org.Hs.eg.db,
                                            cds_gene_id_type = "SYMBOL",
                                            num_unknown = 50,
                                            marker_file_gene_id_type = "SYMBOL")
 end_train <- Sys.time()
+print("Training complete.")
 train_time <- as.numeric(end_train - start_train)
+write.csv(train_time,paste0(opt$output_dir, opt$sample_name,'/garnett_training_time.csv'),row.names = FALSE)
 
-write.csv(train_time,paste0(opt$output_dir,'/garnett_training_time.csv'),row.names = FALSE)
-saveRDS(garnett_classifier, paste0(opt$output_dir, "garnett_classifier.RDS"))
+print("Testing classifier; generating predicted labels...")
+start_test <- Sys.time()
+garnett_test <- classify_cells(sce[,barcodes_selected$test],
+                                  garnett_classifier,
+                                  db = org.Hs.eg.db,
+                                  cluster_extend = TRUE,
+                                  cds_gene_id_type = "SYMBOL")
+
+end_test <- Sys.time()
+test_time <- as.numeric(end_test - start_test)
+print("Prediction complete.")
+print("Saving predicted labels...")
+pred_labels <- list(pData(sce)$cluster_ext_type)
+write.csv(pred_labels,paste0(opt$output_dir, opt$sample_name, '/garnett_pred_label.csv'),row.names = FALSE)
+write.csv(test_time,paste0(opt$output_dir, opt$sample_name, '/garnett_CV_test_time.csv'),row.names = FALSE)
+print("Labels saved.")
+
+print("Saving classifier model...")
+saveRDS(garnett_classifier, paste0(opt$output_dir, "garnett_model.RDS"))
+print("Model saved.")
