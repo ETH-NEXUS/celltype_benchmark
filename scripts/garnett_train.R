@@ -20,7 +20,17 @@ sce <- readRDS(opt$sce)
 barcodes_selected <- readRDS(opt$barcodes_index)
 sce <- estimate_size_factors(sce)
 
-    
+#Convert SCE to Cell_Data_Set (Monocle format)
+sce <- monocle3::new_cell_data_set(expression_data=t(sce@assays$data$counts))
+# To-do: add metadata
+sce <- monocle3::new_cell_data_set(expression_data=sce@assays$data$counts)
+monocle3::fData(sce)$gene_id <- row.names(sce)
+features <- read.table("/cluster/project/nexus/benchmarking/celltyping/test_pilot/cellranger_run/zheng_sorted_merged/outs/filtered_feature_bc_matrix/features.tsv.gz")
+features <- features[1:2]
+names(features) <- c("gene_id","gene_short_name")
+match_index <- match(row.names(sce), features$gene_id)
+monocle3::fData(sce)$gene_short_name <- features$gene_short_name[match_index]
+######### Garnett run ##########    
 print("Starting training...")
 start_train <- Sys.time()
 garnett_classifier <- train_cell_classifier(cds = sce[,barcodes_selected$train], 
