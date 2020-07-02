@@ -1,14 +1,14 @@
 def get_sample_names():
     output = [] 
     if output == []:
-        if not 'SAMPLE_MAPPING' in globals():
+        if not 'SAMPLEMAPPING' in globals():
             return ['NOMAPPINGFILE']
         try:
-            open(SAMPLE_MAPPING, "r")
+            open(SAMPLEMAPPING, "r")
         except IOError:
             return ['NOMAPPINGFILE']
         sampleMap = dict()
-        with open(SAMPLE_MAPPING, "r") as f:
+        with open(SAMPLEMAPPING, "r") as f:
             for line in f:
                 if line.strip() != "":
                     lineSplit = line.strip().split()
