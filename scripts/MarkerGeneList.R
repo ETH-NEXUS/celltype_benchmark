@@ -48,5 +48,16 @@ for (grp in levels(lab_data)){
                       min.cells.group = 20)
   mgl[[grp]] <- rownames(mark[which(mark$p_val_adj<0.05),])
 }
-saveRDS(mgl, opt$outputDirec %&% opt$sampleName %&% ".RDS")
+
+#gmx format
+nRow <- max(as.numeric(summary(mgl)[,1]))+1
+mgl2 <- data.frame(matrix(NA,nrow = nRow,ncol = length(mgl)))
+for (i in 1:length(mgl)){
+  mgl2[2:(length(mgl[[i]])+1),i] <- mgl[[i]]
+}
+colnames(mgl2) <- names(mgl)
+
+#output
+write_tsv(mgl2,opt$outputDirec %&% opt$sampleName %&% ".gmx",na="")
+
 
