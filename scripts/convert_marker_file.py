@@ -75,5 +75,5 @@ def write_generic_markerfile(identity_genes):
         out_file.write(k+","+",".join(v)+"\n")
     out_file.close()
 #%%
-marker_dict = read_marker_file(marker_file_path)
+marker_dict = read_marker_file(gmx_path)
 write_generic_markerfile(marker_dict)
