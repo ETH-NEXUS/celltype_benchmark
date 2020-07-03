@@ -173,10 +173,34 @@ rule svm_train_all:
         shell:
                 config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
 
+# helper script - converts SCE to CDS (input for Garnett)
+rule sce_to_cds:
+        input:
+                sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS'
+        output:
+                cds_out = CDS_OUT + '{sample}.monocle3_cds.RDS'
+        params:
+                lsfoutfile = METHOD_TRAIN_OUT + '{sample}.sce_to_cds.lsfout.log',
+                lsferrfile = METHOD_TRAIN_OUT + '{sample}.sce_to_cds.lsferr.log',
+                scratch = config['preprocessing']['sce_to_cds']['scratch'],
+                mem = config['preprocessing']['sce_to_cds']['mem'],
+                time = config['preprocessing']['sce_to_cds']['time'],
+                params = config['preprocessing']['sce_to_cds']['params'],
+                output_dir = CDS_OUT
+                sample_name = "{sample}"
+        threads:
+                config['preprocessing']['sce_to_cds']['threads']
+        conda:
+                config['methods']['garnett']['conda']
+        benchmark:
+                METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_train.benchmark'
+        shell:
+                config['preprocessing']['sce_to_cds']['call'] + ' --sce_in {input.sce_in} --sample_name {params.sample_name} --cds_out {output.cds_out}'
+
 # method garnett, training, crossvalidation
 rule garnett_train:
         input:
-                sce_in =  INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
+                cds_in =  CDS_OUT + '{sample}.monocle3_cds.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.indexFold_{k_index}.RDS'
         output:
                 pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_predicted_labels.tsv'
@@ -196,12 +220,12 @@ rule garnett_train:
         benchmark:
                 METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_train.benchmark'
         shell:
-                config['methods']['garnett']['train']['call'] + ' --sce {input.sce_in} --barcodes_index {input.barcodes} --output_dir {params.output_dir} --pred_labels_out {output.pred_labels} --sample_name {params.sample_name}'
+                config['methods']['garnett']['train']['call'] + ' --cds {input.cds_in} --barcodes_index {input.barcodes} --output_dir {params.output_dir} --pred_labels_out {output.pred_labels} --sample_name {params.sample_name}'
 
 # method garnett, training, complete model
 rule garnett_train_all:
         input:
-                sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS'
+                cds_in =  CDS_OUT + '{sample}.monocle3_cds.RDS'
         output:
                 pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_predicted_labels_all.tsv'
         params:
@@ -220,7 +244,7 @@ rule garnett_train_all:
         benchmark:
                 METHOD_ALL_TRAIN_OUT + '{sample}.garnett_train_all.benchmark'
         shell:
-                config['methods']['garnett']['train']['call'] + ' --sce {input.sce_in} --output_dir {params.output_dir} --pred_labels_out {output.pred_labels} --sample_name {params.sample_name}'
+                config['methods']['garnett']['train']['call'] + ' --cds {input.cds_in} --output_dir {params.output_dir} --pred_labels_out {output.pred_labels} --sample_name {params.sample_name}'
 
 # helper function to retrieve files necessary for the crossvalidation evaluation
 def getTrainedSubsets(wildcards):

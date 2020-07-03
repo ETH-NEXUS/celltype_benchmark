@@ -6,8 +6,8 @@ library(org.Hs.eg.db)
 
 option_list = list(
   make_option("--sce_in", type = "character", help = "Path to RDS file containing SCE data object."),
-  make_option("--cv_index", type = "character", help = "Path to RDS file containing list of barcodes with which to subset data."),
-  make_option("--output_dir", type = "character", help = "Output path in which to save final (converted) CDS object."),
+  make_option("--cds_out", type = "character", help = "Path to output file of final (converted) CDS object."),
+  make_option("--sample_name", type = "character", help = "Sample name of input SCE data.")
 )
 
 opt_parser = OptionParser(option_list = option_list)
@@ -15,7 +15,6 @@ opt = parse_args(opt_parser)
 
 # Read in SCE object & list of barcodes to subset it on
 data <- readRDS(opt$sce_in)
-selected_barcodes <- readRDS(opt$cv_index)
 
 # Preserve data/annotations that are not automatically included in conversion
 umap_cl <- data@colData$umap_cl
@@ -42,5 +41,4 @@ match_index <- match(row.names(data), features$gene_id)
 fData(data)$gene_short_name <- features$gene_short_name[match_index]
 
 #Save newly converted CDS file(s): train set & test set for Garnett classifier training.
-saveRDS(data[,selected_barcodes$train], paste0(opt$output_dir, opt$sample_name, "_train_cds.RDS"))
-saveRDS(data[,selected_barcodes$test], paste0(opt$output_dir, opt$sample_name, "_test_cds.RDS"))
+saveRDS(data, paste0(opt$output_dir, opt$sample_name, ".monocle3_cds.RDS"))

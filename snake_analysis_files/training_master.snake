@@ -40,6 +40,8 @@ METHOD_TRAIN_OUT = OUTDIR + "crossvalidation/"
 
 METHOD_ALL_TRAIN_OUT = OUTDIR + "trained_model/"
 
+CDS_OUT = OUTDIR + "converted_cds/"
+
 # Include the rules
 include: "training_rules.py"
 
