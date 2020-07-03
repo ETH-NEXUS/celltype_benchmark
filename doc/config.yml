@@ -65,6 +65,16 @@ markers:
     threads: 1
     params: ""
 
+preprocessing:
+
+  sce_to_cds:
+    call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/convert_sce_to_cds.R"
+    scratch: "1000"
+    mem: "1000"
+    time: "200"
+    threads: 1
+    params: ""
+    conda: "/cluster/project/nexus/benchmarking/celltyping/docs/conda_envs/garnett.yaml"
 
 methods:
 
