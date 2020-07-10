@@ -1,25 +1,26 @@
 ################################################################################
-## Random Forest Testing
+## Fully Connected Neural Network Testing
 ################################################################################
 
 #library
 library(optparse)
 library(tidyverse)
-library(randomForest)
+library(caret)
 library(cowplot)
+library(keras)
 
 #Data Path
 #opt = list(
 #  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
 #  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  rf_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.RF_model.RDS",
-#  sampleName = "RF_test",
-#  method = "RF"
+#  nn_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.fcNN_model.h5",
+#  sampleName = "fcNN_Test",
+#  method = "fcNN"
 #)
 # command line arguments are parsed
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
-  make_option("--rf_model", type = "character", help = "Path to the file containing the pretrained RF model."),
+  make_option("--nn_model", type = "character", help = "Path to the file containing the pretrained fcNN model."),
   make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
   make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name."),
   make_option("--method", type = "character", help = "Method identifier. Attached to each output name.")
@@ -39,26 +40,23 @@ path = opt$outputDirec %&% opt$sampleName
 ## load input data
 sce_data = readRDS(opt$SCE)
 lab_data = colData(sce_data)$true_label
-rf_model = readRDS(opt$rf_model)
-
-#data frame
-lab_data <- data.frame(label=lab_data)
+nn_model = load_model_hdf5(opt$nn_model)
 dat <- as.data.frame(t(normcounts(sce_data)))
 rownames(dat) <- colnames(sce_data)
 colnames(dat) <- gsub("-","_",colnames(dat))
-xlevel = names(rf_model$forest$ncat)
-dat_filter <- dat[,colnames(dat) %in% xlevel]
-data_rf <- cbind(droplevels(lab_data),dat_filter[,which(apply(dat_filter,2,sum) != 0)])
+data_nn <- cbind(droplevels(lab_data),dat[,which(apply(dat,2,sum) != 0)])
 
-# Random Forest prediction
-pred.rf <- predict(rf_model,newdata = data_rf[,-1])
-prob.rf <- predict(rf_model,newdata = data_rf[,-1],type = "prob")
-idx.unk <- apply(prob.rf,1,max)<0.7
-pred.rf <- as.character(pred.rf)
-pred.rf[idx.unk] <- "unknown"
+x_test <- data_nn[,2:ncol(data_nn)]
+x_test <- as.matrix(x_test)
 
-################################################################################
-## save predicted labels
-write.csv(pred.rf,path %&% "." %&%
-            opt$method %&% "_predicted_test_labels.csv")
-#confusionMatrix(data_rf[,1],factor(pred.rf,levels=levels(data_rf[,1])))
+#predict labels
+tmp <- predict_classes(nn_model,x_test)
+tmp2 <- tmp +1
+lev <- levels(test_fold[,1])
+res <- as.character(tmp2)
+for(i in 1:length(lev)){
+  res[tmp2 %in% i] <- lev[i]
+}
+write.csv(res,path %&% "." %&% opt$method %&%
+            "_predicted_test_label.csv",quote = F,row.names = F)
+#confusionMatrix(data_nn[,1],factor(res,levels=levels(data_nn[,1])))

@@ -1,13 +1,13 @@
 ################################################################################
-## Random Forest Training
+## Fully Connected Neural Network Training
 ################################################################################
 
 #library
 library(optparse)
 library(tidyverse)
-library(randomForest)
-library(cowplot)
 library(caret)
+library(cowplot)
+library(keras)
 
 #Data Path
 #opt = list(
@@ -15,8 +15,9 @@ library(caret)
 #  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
 #  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold_01.RDS",
 #  sampleName = "Fold_01",
-#  method = "RF"
+#  method = "fcNN"
 #)
+
 # command line arguments are parsed
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),
@@ -31,7 +32,7 @@ opt = parse_args(opt_parser)
 
 # Parameters
 '%&%' = function(a,b) paste(a,b,sep="")
-Ntrees <- 500
+path = opt$outputDirec %&% opt$sampleName
 
 ################################################################################
 ## main code starts here
@@ -48,29 +49,74 @@ rownames(dat) <- colnames(sce_data)
 colnames(dat) <- gsub("-","_",colnames(dat))
 data_rf <- cbind(droplevels(lab_data),dat[,which(apply(dat,2,sum) != 0)])
 
+
 #cross validation
 training_fold = data_rf[rownames(data_rf) %in% cvindex$train_data, ]
 test_fold = data_rf[rownames(data_rf) %in% cvindex$test_data, ]
 
-#random forest
-classifier <- randomForest(label~.,
-                           data=training_fold,
-                           ntree=Ntrees)
+x_train <- training_fold[,2:ncol(data_rf)]
+y_train <- training_fold[,1]
+x_test <- test_fold[,2:ncol(data_rf)]
+y_test <- test_fold[,1]
+
+to_one_hot <- function(labels, dimension = 6) {
+  results <- matrix(0, nrow = length(labels), ncol = dimension)
+  for (i in 1:length(labels))
+    results[i, labels[[i]]] <- 1
+  results
+}
+#shape
+y_test <- as.matrix(as.numeric(y_test),ncol=1)
+y_test <- to_one_hot(y_test)
+
+y_train <- as.matrix(as.numeric(y_train),ncol=1)
+y_train <- to_one_hot(y_train)
+
+x_train <- as.matrix(x_train)
+x_test <- as.matrix(x_test)
+
+#fcNN
+model <- keras_model_sequential() %>%
+  layer_dense(units = 500, activation = 'relu', input_shape = c(ncol(data_rf))) %>%
+  layer_dense(units = 200, activation = 'relu') %>%
+  layer_dense(units = 50, activation = 'relu') %>%
+  layer_dense(units = 6, activation = 'softmax')
+#summary(model)
+# compile model and intitialize weights
+model %>% compile(
+  optimizer = "adam",
+  loss = "categorical_crossentropy",
+  metrics = c("accuracy")
+)
+
 if (!is_empty(cvindex$test_data)){
-  y_pred = predict(classifier, newdata = test_fold[,-1])
-  #y_pred <- factor(y_pred,levels = lev)
-  #y_test <- test_fold[, 1] %>%
-  #mutate(label=factor(label,levels = lev))
-  #confusion matrix
-  #cm = confusionMatrix(y_test$label, y_pred)
-  #saveRDS(cm, path %&% "_cm.RDS")
-  write.csv(y_pred,opt$outputDirec %&%
-              opt$sampleName %&%
-              "." %&% opt$method %&%
-              "_predicted_labels.csv",
-            quote = F,row.names = F)
+  history <- model %>% fit(
+    x_train, y_train, 
+    epochs = 20, batch_size=100,
+    verbose=1, validation_data = list(x_test, y_test))
 } else {
-  saveRDS(classifier, opt$outputDirec %&%
+  history <- model %>% fit(
+    x_train, y_train, 
+    epochs = 20, batch_size=100,
+    verbose=1)
+}
+
+#plot(history)
+#results <- model %>% evaluate(x_test, y_test, verbose=0)
+#results
+
+if (!is_empty(cvindex$test_data)){
+  tmp <- predict_classes(model,x_test)
+  tmp2 <- tmp +1
+  lev <- levels(test_fold[,1])
+  res <- as.character(tmp2)
+  for(i in 1:length(lev)){
+    res[tmp2 %in% i] <- lev[i]
+  }
+  write.csv(res,path %&% "." %&% opt$method %&%
+              "_predicted_label.csv",quote = F,row.names = F)
+} else {
+  save_model_hdf5(model, opt$outputDirec %&%
             opt$sampleName%&% "." %&%
-            opt$method %&% "_model.RDS")
+            opt$method %&% "_model.h5")
 }
