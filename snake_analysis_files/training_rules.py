@@ -95,13 +95,14 @@ rule rf_train:
                 time = config['methods']['rf']['train']['time'],
                 params = config['methods']['rf']['train']['params'],
                 output_dir = METHOD_TRAIN_OUT,
-                sample_name = "{sample}"
+                sample_name = "{sample}",
+                method_name = "rf"
         threads:
                 config['methods']['rf']['train']['threads']
         benchmark:
                 METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.rf_train.benchmark'
         shell:
-                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
 
 if not 'METHOD_ALL_TRAIN_OUT' in globals():
     METHOD_ALL_TRAIN_OUT = OUTDIR + "trained_model/"
@@ -111,7 +112,8 @@ rule rf_train_all:
                 sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.indexAll.RDS'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.rf_predicted_labels_all.tsv'
+                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.rf_predicted_labels.csv',
+                model_out = METHOD_ALL_TRAIN_OUT + '{sample}.rf_model.RDS'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.rf_train_all.lsfout.log',
                 lsferrfile = METHOD_ALL_TRAIN_OUT + '{sample}.rf_train_all.lsferr.log',
@@ -120,13 +122,14 @@ rule rf_train_all:
                 time = config['methods']['rf']['train']['time'],
                 params = config['methods']['rf']['train']['params'],
                 output_dir = METHOD_ALL_TRAIN_OUT,
-                sample_name = "{sample}"
+                sample_name = "{sample}",
+                method_name = "rf"
         threads:
                 config['methods']['rf']['train']['threads']
         benchmark:
                 METHOD_ALL_TRAIN_OUT + '{sample}.rf_train_all.benchmark'
         shell:
-                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['rf']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
 # method svm, training crossvalidation
 rule svm_train:
         input:
@@ -142,13 +145,14 @@ rule svm_train:
                 time = config['methods']['svm']['train']['time'],
                 params = config['methods']['svm']['train']['params'],
                 output_dir = METHOD_TRAIN_OUT,
-                sample_name = "{sample}"
+                sample_name = "{sample}",
+                method_name = "svm"
         threads:
                 config['methods']['svm']['train']['threads']
         benchmark:
                 METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.svm_train.benchmark'
         shell:
-                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
 
 # method svm, training, complete model
 rule svm_train_all:
@@ -156,7 +160,8 @@ rule svm_train_all:
                 sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.indexAll.RDS'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.svm_predicted_labels_all.tsv'
+                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.svm_predicted_labels.csv',
+                model_out = METHOD_ALL_TRAIN_OUT + '{sample}.svm_model.RDS'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.svm_train_all.lsfout.log',
                 lsferrfile = METHOD_ALL_TRAIN_OUT + '{sample}.svm_train_all.lsferr.log',
@@ -165,13 +170,63 @@ rule svm_train_all:
                 time = config['methods']['svm']['train']['time'],
                 params = config['methods']['svm']['train']['params'],
                 output_dir = METHOD_ALL_TRAIN_OUT,
-                sample_name = "{sample}"
+                sample_name = "{sample}",
+                method_name = "svm"
         threads:
                 config['methods']['svm']['train']['threads']
         benchmark:
                 METHOD_ALL_TRAIN_OUT + '{sample}.svm_train_all.benchmark'
         shell:
                 config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+
+# method fcNN, training crossvalidation
+rule fcnn_train:
+        input:
+                sce_in =  INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
+                barcodes = METHOD_TRAIN_IN + '{sample}.indexFold_{k_index}.RDS'
+        output:
+                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_predicted_label.csv'
+        params:
+                lsfoutfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_train.lsfout.log',
+                lsferrfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_train.lsferr.log',
+                scratch = config['methods']['fcnn']['train']['scratch'],
+                mem = config['methods']['fcnn']['train']['mem'],
+                time = config['methods']['fcnn']['train']['time'],
+                params = config['methods']['fcnn']['train']['params'],
+                output_dir = METHOD_TRAIN_OUT,
+                sample_name = "{sample}",
+                method_name = "fcnn"
+        threads:
+                config['methods']['fcnn']['train']['threads']
+        benchmark:
+                METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_train.benchmark'
+        shell:
+                config['methods']['fcnn']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
+
+# method fcNN, training, complete model
+rule fcnn_train_all:
+        input:
+                sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
+                barcodes = METHOD_TRAIN_IN + '{sample}.indexAll.RDS'
+        output:
+                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_predicted_labels.csv',
+                model_out = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_model.h5'
+        params:
+                lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_train_all.lsfout.log',
+                lsferrfile = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_train_all.lsferr.log',
+                scratch = config['methods']['fcnn']['train']['scratch'],
+                mem = config['methods']['fcnn']['train']['mem'],
+                time = config['methods']['fcnn']['train']['time'],
+                params = config['methods']['fcnn']['train']['params'],
+                output_dir = METHOD_ALL_TRAIN_OUT,
+                sample_name = "{sample}",
+                method_name = "fcnn"
+        threads:
+                config['methods']['svm']['train']['threads']
+        benchmark:
+                METHOD_ALL_TRAIN_OUT + '{sample}.svm_train_all.benchmark'
+        shell:
+                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
 
 # helper script - converts SCE to CDS (input for Garnett)
 rule sce_to_cds:
@@ -186,7 +241,7 @@ rule sce_to_cds:
                 mem = config['preprocessing']['sce_to_cds']['mem'],
                 time = config['preprocessing']['sce_to_cds']['time'],
                 params = config['preprocessing']['sce_to_cds']['params'],
-                output_dir = CDS_OUT
+                output_dir = CDS_OUT,
                 sample_name = "{sample}"
         threads:
                 config['preprocessing']['sce_to_cds']['threads']
@@ -227,7 +282,8 @@ rule garnett_train_all:
         input:
                 cds_in =  CDS_OUT + '{sample}.monocle3_cds.RDS'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_predicted_labels_all.tsv'
+                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_predicted_labels_all.tsv',
+                model_out = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_model.RDS'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_train_all.lsfout.log',
                 lsferrfile = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_train_all.lsferr.log',
@@ -250,11 +306,14 @@ rule garnett_train_all:
 def getTrainedSubsets(wildcards):
         return expand(METHOD_TRAIN_OUT + wildcards.sample + '.indexFold_{k_index}.{method}_predicted_labels.tsv', k_index = K_FOLD_INDEX, method = SELECTED_METHODS)
 
+if not 'CV_SUMMARY_IN' in globals():
+    CV_SUMMARY_IN = INPUTDIR
+
 # get the crossvalidation summary
 rule cv_summary_train:
         input:
                 cv_files = getTrainedSubsets,
-                sce_in = METHOD_TRAIN_IN + "{sample}.indexAll.RDS"
+                sce_in = CV_SUMMARY_IN + "{sample}.genes_cells_filtered.corrected.RDS"
         output:
                 METHOD_TRAIN_OUT + '{sample}.cv_summary.tsv'
         params:

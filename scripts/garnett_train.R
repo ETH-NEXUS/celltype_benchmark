@@ -52,5 +52,5 @@ write.csv(test_time,paste0(opt$output_dir, opt$sample_name, '/garnett_CV_test_ti
 print("Labels saved.")
 
 print("Saving classifier model...")
-saveRDS(garnett_classifier, paste0(opt$output_dir, "garnett_model.RDS"))
+saveRDS(garnett_classifier, paste0(opt$output_dir, opt$sample_name, ".garnett_model.RDS"))
 print("Model saved.")

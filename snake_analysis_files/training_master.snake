@@ -23,7 +23,7 @@ if not 'TMPDIR' in globals():
 
 
 K_FOLD_INDEX = list(range(1, config['statistics']['cross_validation']['k_folds'] + 1))
-SELECTED_METHODS = ['rf','svm']
+SELECTED_METHODS = config['resources']['tools']
 
 print(K_FOLD_INDEX)
 print(SELECTED_METHODS)
@@ -31,6 +31,8 @@ print(get_sample_names())
 ####################################################
 CV_FOLD_IN = INPUTDIR
 CV_FOLD_OUT = OUTDIR + "cv_k_index/"
+
+CV_SUMMARY_IN = INPUTDIR
 
 MARKER_GENES_IN = INPUTDIR
 MARKER_GENES_OUT = OUTDIR + "marker_genes/"
