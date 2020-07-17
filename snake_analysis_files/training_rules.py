@@ -95,7 +95,7 @@ rule rf_train:
                 time = config['methods']['rf']['train']['time'],
                 params = config['methods']['rf']['train']['params'],
                 output_dir = METHOD_TRAIN_OUT,
-                sample_name = "{sample}",
+                sample_name = "{sample}.indexFold_{k_index}",
                 method_name = "rf"
         threads:
                 config['methods']['rf']['train']['threads']
@@ -145,7 +145,7 @@ rule svm_train:
                 time = config['methods']['svm']['train']['time'],
                 params = config['methods']['svm']['train']['params'],
                 output_dir = METHOD_TRAIN_OUT,
-                sample_name = "{sample}",
+                sample_name = "{sample}.indexFold_{k_index}",
                 method_name = "svm"
         threads:
                 config['methods']['svm']['train']['threads']
@@ -177,7 +177,7 @@ rule svm_train_all:
         benchmark:
                 METHOD_ALL_TRAIN_OUT + '{sample}.svm_train_all.benchmark'
         shell:
-                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
 
 # method fcNN, training crossvalidation
 rule fcnn_train:
@@ -194,7 +194,7 @@ rule fcnn_train:
                 time = config['methods']['fcnn']['train']['time'],
                 params = config['methods']['fcnn']['train']['params'],
                 output_dir = METHOD_TRAIN_OUT,
-                sample_name = "{sample}",
+                sample_name = "{sample}.indexFold_{k_index}",
                 method_name = "fcnn"
         threads:
                 config['methods']['fcnn']['train']['threads']
@@ -267,7 +267,7 @@ rule garnett_train:
                 time = config['methods']['garnett']['train']['time'],
                 params = config['methods']['garnett']['train']['params'],
                 output_dir = METHOD_TRAIN_OUT,
-                sample_name = "{sample}"
+                sample_name = "{sample}.indexFold_{k_index}"
         threads:
                 config['methods']['garnett']['train']['threads']
         conda:
