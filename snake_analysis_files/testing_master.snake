@@ -1,0 +1,60 @@
+import os, glob, sys, datetime
+from os import path
+
+# This function adapts the config object to include full path information
+include: "misc_snake.py"
+
+# input files and folders
+SAMPLEMAPPING = config['input_output']['sample_map']
+INPUTDIR = config['input_output']['input_dir']
+OUTDIR = config['input_output']['output_dir']
+TMPDIR = config['input_output']['tmp_dir']
+
+# Check if the uses specified the proper input and output directories
+if not 'INPUTDIR' in globals():
+    print('You have to specify the root directory of the input files!')
+    sys.exit(1)
+if not 'OUTDIR' in globals():
+    print('You have to specify the root directory where the results will be generated!')
+    sys.exit(1)
+if not 'TMPDIR' in globals():
+    print('You have to specify the root directory where temporary files will be stored!')
+    sys.exit(1)
+
+# Include the rules
+#include: "training_rules.py"
+include: "testing_rules.py"
+
+SELECTED_METHODS = config['resources']['tools']
+#print(SELECTED_METHODS)
+#print(get_sample_names())
+
+def get_method_names(methods):
+    return methods
+####################################################
+
+METHOD_TEST_IN = OUTDIR + "trained_model/"
+METHOD_TEST_OUT = OUTDIR + "test_results/"
+
+# Include the rules
+#include: "training_rules.py"
+#include: "testing_rules.py"
+
+localrules: all
+rule all:
+	input:
+		expand(METHOD_TEST_OUT + "{sample}.{method}.predicted_labels.csv", sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
+                expand(METHOD_TEST_OUT + '{sample}.confusion_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
+                expand(METHOD_TEST_OUT + '{sample}.f1-score_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
+                expand(METHOD_TEST_OUT + '{sample}.population-size_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
+                expand(METHOD_TEST_OUT + '{sample}.summary_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS))
+	output:
+		OUTDIR + "complete_testing.txt"
+	params:
+		lsfoutfile = expand(OUTDIR + 'complete_testing.lsfout.log'),
+		lsferrfile = expand(OUTDIR + 'complete_testing.lsferr.log')
+	benchmark:
+		OUTDIR + 'complete_testing.txt.benchmark'
+	shell:
+		'date > {output}'
+

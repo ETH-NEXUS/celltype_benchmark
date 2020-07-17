@@ -1,11 +1,26 @@
 import os, glob, sys, datetime
 from os import path
+###################################################
+configfile: 'config.yml'
+include: misc_snake.py 
+###########MAIN PATHS & DIRECTORIES#################
+
+SAMPLE_MAPPING = config['input_output']['sample_map']
+sample = get_sample_names()
+
+OUTPUT_DIR = config['input_output']['output_dir']
+TMP_DIR = config['input_output']['tmp_dir']
 
 ####################################################
+# Path for all accuracy output measures to be saved:
+PREDICTED_TEST_OUT = OUTPUT_DIR + "cv_test_summary/"
+
 CV_FOLD_OUT = OUTPUT_DIR + "cv_k_fold/"
 
+# Path to marker genes file (.gmx) generated via Seurat's FindMarkers() fxn.
 MARKER_GENES_OUT = OUTPUT_DIR + "marker_genes/"
 
+###### Input/output dirs for each method: ######
 RF_TEST_IN = OUTPUT_DIR + "rf/"
 RF_TEST_OUT = PREDICTED_TEST_OUT
 
@@ -18,48 +33,65 @@ GARNETT_TEST_OUT = PREDICTED_TEST_OUT
 NEXUS_TEST_OUT = PREDICTED_TEST_OUT
 
 ########################################################
+localrule: test_summary, calc_statistics, plot_stats, all
+
+rule all:
+        input:
+                expand(PREDICTED_TEST_OUT + '{sample}.rf.predicted_labels.tsv', sample = sample),
+                expand(PREDICTED_TEST_OUT + '{sample}.svm.predicted_labels.tsv', sample = sample),
+                expand(PREDICTED_TEST_OUT + '{sample}.garnett.predicted_labels.tsv', sample = sample),
+                expand(PREDICTED_TEST_OUT + '{sample}.{tools}.predicted_labels.tsv', sample=sample, tools = ['rf','svm','garnett','nexus'] ),
+                expand(PREDICTED_TEST_OUT + 'cv_summary.tsv', sample = sample)
+        output:
+                OUTPUT_DIR + "complete.txt"
+        params:
+                lsfoutfile = '{sample}.test_run.lsfout.log',
+                lsferrfile = '{sample}.test_run.lsferr.log',
+        benchmark:
+                'test_run.benchmark'
+        shell:
+                ' date > {output}'
 
 rule rf_test:
         input:
-                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
-		RF_TEST_IN + '{sample}.model.RDS'
+                sce = INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		model = RF_TEST_IN + '{sample}.model.RDS'
         output:
                 PREDICTED_TEST_OUT + '{sample}.rf.predicted_labels.tsv'
         shell:
-              config['call']['rf_test'] + ' {input}'
+                config['methods']['rf']['test']['call'] + ' --SCE {input.sce} --model {input.model}'
 
 rule svm_test:
         input:
-                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
-		SVM_TEST_IN + '{sample}.model.RDS'
+                sce = INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		model = SVM_TEST_IN + '{sample}.model.RDS'
         output:
                 SVM_TEST_OUT + '{sample}.model.RDS',
                 PREDICTED_TEST_OUT + '{sample}.svm.predicted_labels.tsv'
         shell:
-                config['call']['svm_test'] + ' {input}'
+                config['methods']['svm']['test']['call'] + ' --SCE {sce.input} --model {input.model}'
 
 rule garnett_test:
         input:
-                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
-		GARNETT_TEST_IN + '{sample}.model.RDS',
-		MARKER_GENES_OUT + "{sample}_markers_garnett.tsv"
+                sce = INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		model = GARNETT_TEST_IN + '{sample}.model.RDS',
         output:
                 GARNETT_TEST_OUT + '{sample}.model.RDS',
                 PREDICTED_TEST_OUT + '{sample}.garnett.predicted_labels.tsv'
         shell:
-                config['call']['garnett_test'] + ' {input}'
+                config['methods']['garnett']['test']['call'] + ' --SCE {sce.input} --model {input.model}'
 
 rule nexus_test:
         input:
-                INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
-		MARKER_GENES_OUT + "{sample}_markers.gmx"
+                sce = INPUT_DIR + '{sample}.genes_cells_filtered.corrected.atypical_removed.RDS',
+		marker_file = MARKER_GENES_OUT + "{sample}_markers.gmx"
         output:
                 NEXUS_TEST_OUT + '{sample}.model.RDS',
 		PREDICTED_TEST_OUT + '{sample}.nexus.predicted_labels.tsv'
         shell:
-                config['call']['nexus_test'] + '{input}'
+                config['methods']['garnett']['test']['call'] + ' --SCE {sce.input} --marker_file {input.marker_file}'
 
-rule cv_summary_test:
+rule test_summary:
         input:
                 expand(PREDICTED_TEST_OUT + '{sample}.{tools}.predicted_labels.tsv', sample=sample, tools = ['rf','svm','garnett','nexus'] )
         output:
