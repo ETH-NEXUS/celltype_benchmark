@@ -7,21 +7,15 @@ library(optparse)
 library(tidyverse)
 library(Seurat)
 
-#Data Path
-opt = list(
-  outputDirec = "/Users/bolars/Documents/celltyping/processed_sce/",
-  SCE = "/Users/bolars/Documents/celltyping/processed_sce/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-  sampleName = "MakerGeneList"
-)
 # command line arguments are parsed
-#option_list = list(
-#  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
-#  make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
-#  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
-#)
+option_list = list(
+  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
+  make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
+  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name.")
+)
 
-#opt_parser = OptionParser(option_list = option_list)
-#opt = parse_args(opt_parser)
+opt_parser = OptionParser(option_list = option_list)
+opt = parse_args(opt_parser)
 '%&%' = function(a,b) paste(a,b,sep="")
 
 ################################################################################
@@ -29,11 +23,12 @@ opt = list(
 ################################################################################
 ## load input data
 sce_data <- readRDS(opt$SCE)
-lab_data <- colData(sce_data)$true_label
+lab_data <- sce_data@metadata$ground_truth_major
 
 seutat_data <- as.Seurat(sce_data, data = NULL)
 Idents(seutat_data) = lab_data
 
+lab_data <- factor(lab_data)
 mgl <- vector(mode = "list",length = length(levels(lab_data)))
 names(mgl) <- levels(lab_data)
 

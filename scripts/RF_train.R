@@ -8,6 +8,7 @@ library(tidyverse)
 library(randomForest)
 library(cowplot)
 library(caret)
+library(SingleCellExperiment)
 
 #Data Path
 #opt = list(
@@ -38,7 +39,7 @@ Ntrees <- 500
 ################################################################################
 ## load input data
 sce_data = readRDS(opt$SCE)
-lab_data = colData(sce_data)$true_label
+lab_data = sce_data@metadata$ground_truth_major
 cvindex = readRDS(opt$CVindex)
 
 #data frame

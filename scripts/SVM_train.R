@@ -8,7 +8,7 @@ library(tidyverse)
 library(e1071)
 library(cowplot)
 library(caret)
-
+library(SingleCellExperiment)
 #Data Path
 #opt = list(
 #  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
@@ -37,7 +37,7 @@ opt = parse_args(opt_parser)
 ################################################################################
 ## load input data
 sce_data = readRDS(opt$SCE)
-lab_data = colData(sce_data)$true_label
+lab_data = sce_data@metadata$ground_truth_major
 cvindex = readRDS(opt$CVindex)
 
 #data frame
