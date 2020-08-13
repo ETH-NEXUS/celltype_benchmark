@@ -1,4 +1,4 @@
-library(opt_parse)
+library(optparse)
 library(SingleCellExperiment)
 
 option_list = list(
@@ -15,16 +15,16 @@ add_sce_groundtruth <- function(rds_path, labels_path, output_path){
     sce@metadata$ground_truth_major <- runif(ncol(sce))
     sce@metadata$ground_truth_minor <- runif(ncol(sce))
 
-    labels <- read.table(labels_path, skip=1, sep ='\t')
-    labels_full <- labels$V2
-    labels_short <- labels$V3
-    names(labels_full) <- labels$V1
-    names(labels_short) <- labels$V1
+    labels <- read.table(labels_path, header = TRUE, sep ='\t')
+    major_label <- labels$major_label
+    minor_label <- labels$minor_label
+    names(major_label) <- labels$barcode
+    names(minor_label) <- labels$barcode
     
-    match_index <- match(sce$barcodes, substr(names(labels_full),1,16))
+    match_index <- match(sce$barcodes, substr(names(major_label),1,16))
 
-    sce@metadata$ground_truth_major <- as.character(labels_short[match_index])
-    sce@metadata$ground_truth_minor <- as.character(labels_full[match_index])
+    sce@metadata$ground_truth_major <- as.character(major_label[match_index])
+    sce@metadata$ground_truth_minor <- as.character(minor_label[match_index])
     
     saveRDS(sce, output_path)
     }
