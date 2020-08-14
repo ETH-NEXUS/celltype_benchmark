@@ -28,7 +28,7 @@ option_list = list(
 
 opt_parser = OptionParser(option_list = option_list)
 opt = parse_args(opt_parser)
-
+opt$method <- strsplit(opt$method, ",")[[1]]
 
 # Parameters
 '%&%' = function(a,b) paste(a,b,sep="")
@@ -39,15 +39,20 @@ path = opt$outputDirec %&% opt$sampleName
 ################################################################################
 ## load input data
 IF_files <- list.files(opt$CVfiles,pattern = "Fold")
+IF_files <- IF_files[grep(opt$sampleName,IF_files)]
+IF_files <- IF_files[grep("predicted_label",IF_files)]
+print(IF_files);print(rep("#",30))
 lfiles <- lapply(opt$method,function(x){IF_files[grep(x,IF_files)]})
 r.files <- matrix(unlist(lfiles),nrow = length(lfiles[[1]]))
-cv_files <- IF_files[grep(".RDS",IF_files)]
+cv_files <- list.files(opt$CVIndex,pattern = "Fold")
+cv_files <- cv_files[grep(opt$sampleName,cv_files)]
+print(cv_files)
 mat <- cbind(cv_files,r.files)
 colnames(mat)[-1] <- opt$method
 
 #load SCE
 sce_data = readRDS(opt$SCE)
-lab_data = colData(sce_data)$true_label
+lab_data = sce_data@metadata$ground_truth_major
 barcode = colnames(sce_data)
 
 #data.frame: ground truth, predicted labels, CV fold
@@ -56,7 +61,7 @@ lab_mat <- as.data.frame(matrix(NA,
                                 ncol = length(opt$method)+2))
 lab_mat[,1] <- lab_data
 for (i in 1:nrow(mat)){
-  tmp <- readRDS(opt$CVfiles %&% mat[i,1])
+  tmp <- readRDS(opt$CVIndex %&% mat[i,1])
   bc <- tmp$test_data
   idx <- which(barcode %in% bc)
   for (j in 1:length(opt$method)){
@@ -67,9 +72,25 @@ for (i in 1:nrow(mat)){
 }
 colnames(lab_mat) <- c("lab_data",opt$method,"folds")
 for (i in 1:length(opt$method)){
-  lab_mat[,i+1] <- factor(lab_mat[,i+1],levels = levels(lab_mat[,1]))
+    cell_types <- levels(factor(lab_mat[,1]))
+    cell_types_predicted <- levels(factor(lab_mat[,i+1]))
+    if(length(cell_types) < length(cell_types_predicted)){
+        print(cell_types)
+        print(cell_types_predicted)
+        cell_types <- c(cell_types,"Unknown")
+    }
+    lab_mat[,i+1] <- factor(lab_mat[,i+1],labels = cell_types)
 }
 
+levels_list <- c()
+for(i in 1:(length(opt$method)+1)){
+    levels_list <- c(levels_list, list(levels(lab_mat[,i])))
+}
+for(i in which(which.max(lengths(levels_list)) != 1:(length(opt$method)+1))){
+    levels(lab_mat[,i]) <- levels(lab_mat[,which.max(lengths(levels_list))])
+}
+
+print(head(lab_mat))
 #confusion matrix: accuracy, F1, overall statistics
 accuracy <- matrix(NA,nrow = length(levels(lab_mat[,1])),
                    ncol = length(opt$method))
@@ -78,7 +99,7 @@ F1 <- matrix(NA,nrow = length(levels(lab_mat[,1])),
 overall <- matrix(NA,nrow = 7,
                   ncol = length(opt$method))
 for (i in 1:length(opt$method)){
-  assign(opt$method[i],confusionMatrix(lab_mat[,1],lab_mat[,i+1]))
+  assign(opt$method[i],confusionMatrix(factor(lab_mat[,1]),lab_mat[,i+1]))
   accuracy[,i] <- round(get(opt$method[i])$byClass[,"Balanced Accuracy"],4)
   F1[,i] <- round(get(opt$method[i])$byClass[,"F1"],4)
   overall[,i] <- round(get(opt$method[i])$overall,4)

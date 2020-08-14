@@ -114,7 +114,6 @@ rule rf_train_all:
                 sce_in = INPUTDIR + '{sample}.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.rf_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.rf_model.RDS'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.rf_train_all.lsfout.log',
@@ -162,7 +161,6 @@ rule svm_train_all:
                 sce_in = INPUTDIR + '{sample}.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.svm_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.svm_model.RDS'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.svm_train_all.lsfout.log',
@@ -211,7 +209,6 @@ rule fcnn_train_all:
                 sce_in = INPUTDIR + '{sample}.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_model.h5'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_train_all.lsfout.log',
@@ -318,22 +315,26 @@ if not 'CV_SUMMARY_IN' in globals():
 # get the crossvalidation summary
 rule cv_summary_train:
         input:
-                cv_files = getTrainedSubsets,
-                sce_in = CV_SUMMARY_IN + "{sample}.RDS"
+                cv_files = METHOD_TRAIN_OUT,
+                sce_in = CV_SUMMARY_IN + "{sample}.RDS",
         output:
-                METHOD_TRAIN_OUT + '{sample}.cv_summary.tsv'
+                accuracy = CV_SUMMARY_OUT + '{sample}_byClass.csv',
+                f1_score = CV_SUMMARY_OUT + '{sample}_F1.csv',
+                overall = CV_SUMMARY_OUT + '{sample}_overall.csv'
         params:
-                lsfoutfile = METHOD_TRAIN_OUT + '{sample}.cv_summary.lsfout.log',
-                lsferrfile = METHOD_TRAIN_OUT + '{sample}.cv_summary.lsferr.log',
+                lsfoutfile = CV_SUMMARY_OUT + '{sample}.cv_summary.lsfout.log',
+                lsferrfile = CV_SUMMARY_OUT + '{sample}.cv_summary.lsferr.log',
                 scratch = config['statistics']['cv_summary']['scratch'],
                 mem = config['statistics']['cv_summary']['mem'],
                 time = config['statistics']['cv_summary']['time'],
                 params = config['statistics']['cv_summary']['params'],
-                output_dir = METHOD_TRAIN_OUT,
-                sample_name = "{sample}"
+                output_dir = CV_SUMMARY_OUT,
+                barcodes_dir = CV_FOLD_OUT,
+                sample_name = "{sample}",
+                tools = ",".join(config['resources']['tools'])
         threads:
                 config['statistics']['cv_summary']['threads']
         benchmark:
-                METHOD_TRAIN_OUT + '{sample}.cv_summary.benchmark'
+                CV_SUMMARY_OUT + '{sample}.cv_summary.benchmark'
         shell:
-                config['statistics']['cv_summary']['call'] + ' --CVfiles {input.cv_files} --SCE {input.sce_in} --outputDirec {params.output_dir} --sampleName {params.sample_name}'
+                config['statistics']['cv_summary']['call'] + ' --CVfiles {input.cv_files} --CVIndex {params.barcodes_dir} --SCE {input.sce_in} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.tools}'
