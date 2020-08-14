@@ -17,7 +17,8 @@ library(caret)
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),
   make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
-  make_option("--kfold", type = "integer", help = " k-fold cross-validation: The original sample is partitioned into k equal sized subsamples.")
+  make_option("--kfold", type = "integer", help = " k-fold cross-validation: The original sample is partitioned into k equal sized subsamples."),
+  make_option("--sample_name", type = "character", help = "Name of sample to be appended to all output files.")
 )
 
 opt_parser = OptionParser(option_list = option_list)
@@ -28,7 +29,7 @@ opt = parse_args(opt_parser)
 ################################################################################
 ## load input data
 sce_data <- readRDS(opt$SCE)
-lab_data <- colData(sce_data)$true_label
+lab_data <- sce_data@metadata$ground_truth_major
 barcode <- colnames(sce_data)
 
 # cross validation
@@ -44,8 +45,8 @@ for(i in 1:length(folds)){
   test_data <- barcode[test_idx]
   train_data <- barcode[train_idx]
   saveRDS(list(test_data=test_data,train_data=train_data),
-            paste(opt$outputDirec,"index",fold_names[i],".RDS",sep=""))
+            paste(opt$outputDirec,opt$sample_name,".index",fold_names[i],".RDS",sep=""))
 }
-saveRDS(list(test_data=numeric(),train_data=barcode[allIndex]),paste(opt$outputDirec,"index_All.RDS",sep=""))
+saveRDS(list(test_data=numeric(),train_data=barcode[allIndex]),paste(opt$outputDirec,opt$sample_name,".index_All.RDS",sep=""))
 
 

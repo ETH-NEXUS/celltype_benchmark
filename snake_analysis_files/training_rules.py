@@ -8,10 +8,10 @@ if not 'CV_FOLD_OUT' in globals():
 # performs the splitting of input files into subsets for the cross validation
 rule cross_validation:
         input:
-                sce_in = CV_FOLD_IN + "{sample}.genes_cells_filtered.corrected.RDS"
+                sce_in = CV_FOLD_IN + "{sample}.RDS"
         output:
                 barcodes_out = expand(CV_FOLD_OUT + '{{sample}}.indexFold_{k_index}.RDS', k_index = K_FOLD_INDEX),
-		barcodes_all = CV_FOLD_OUT + '{sample}.indexAll.RDS'
+		barcodes_all = CV_FOLD_OUT + '{sample}.index_All.RDS'
         params:
                 lsfoutfile = CV_FOLD_OUT + '{sample}.cv_fold.lsfout.log',
                 lsferrfile = CV_FOLD_OUT + '{sample}.cv_fold.lsferr.log',
@@ -19,13 +19,15 @@ rule cross_validation:
                 mem = config['statistics']['cross_validation']['mem'],
                 time = config['statistics']['cross_validation']['time'],
                 params = config['statistics']['cross_validation']['params'],
+                k_folds = config['statistics']['cross_validation']['k_folds'],
+                sample_name = "{sample}",
                 output_dir = CV_FOLD_OUT
         threads:
                 config['statistics']['cross_validation']['threads']
         benchmark:
                 CV_FOLD_OUT + '{sample}.cv_fold.benchmark'
         shell:
-                config['statistics']['cross_validation']['call'] + ' --SCE {input.sce_in} --outputDirec {params.output_dir}'
+                config['statistics']['cross_validation']['call'] + ' --SCE {input.sce_in} --sample_name {params.sample_name} --outputDirec {params.output_dir} --kfold {params.k_folds}'
 
 
 if not 'MARKER_GENES_IN' in globals():
@@ -37,9 +39,9 @@ print(MARKER_GENES_IN)
 # identify marker genes
 rule find_markers:
         input:
-                sce_in =  MARKER_GENES_IN + '{sample}.genes_cells_filtered.corrected.RDS'
+                sce_in =  MARKER_GENES_IN + '{sample}.RDS'
         output:
-                gmx_out = MARKER_GENES_OUT + '{sample}.markers.gmx'
+                gmx_out = MARKER_GENES_OUT + '{sample}.gmx'
         params:
                 lsfoutfile = MARKER_GENES_OUT + '{sample}.find_markers.lsfout.log',
                 lsferrfile = MARKER_GENES_OUT + '{sample}.find_markers.lsferr.log',
@@ -59,9 +61,9 @@ rule find_markers:
 # convert from gmx to tsv
 rule convert_markers:
         input:
-                gmx_in = MARKER_GENES_OUT + '{sample}.markers.gmx'
+                gmx_in = MARKER_GENES_OUT + '{sample}.gmx'
         output:
-                tsv_out = MARKER_GENES_OUT + '{sample}.markers.garnett.tsv'
+                tsv_out = MARKER_GENES_OUT + '{sample}.garnett.tsv'
         params:
                 lsfoutfile = MARKER_GENES_OUT + '{sample}.convert_markers.lsfout.log',
                 lsferrfile = MARKER_GENES_OUT + '{sample}.convert_markers.lsferr.log',
@@ -74,7 +76,7 @@ rule convert_markers:
         benchmark:
                 MARKER_GENES_OUT + '{sample}.convert_markers.benchmark'
         shell:
-                config['markers']['convert_markers']['call'] + ' --gmx_file {input.gmx_in} --tsv_file {output.tsv_out}'
+                config['markers']['convert_markers']['call'] + ' --input_gmx {input.gmx_in} --output_tsv {output.tsv_out}'
 
 if not 'METHOD_TRAIN_IN' in globals():
     METHOD_TRAIN_IN = CV_FOLD_OUT
@@ -83,10 +85,10 @@ if not 'METHOD_TRAIN_OUT' in globals():
 # method rf; training crossvalidaton
 rule rf_train:
         input:
-                sce_in =  INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
+                sce_in =  INPUTDIR + '{sample}.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.indexFold_{k_index}.RDS'
         output:
-                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.rf_predicted_labels.tsv'
+                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.rf_predicted_labels.csv'
         params:
                 lsfoutfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.rf_train.lsfout.log',
                 lsferrfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.rf_train.lsferr.log',
@@ -109,8 +111,8 @@ if not 'METHOD_ALL_TRAIN_OUT' in globals():
 # method rf, training complete model
 rule rf_train_all:
         input:
-                sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
-                barcodes = METHOD_TRAIN_IN + '{sample}.indexAll.RDS'
+                sce_in = INPUTDIR + '{sample}.RDS',
+                barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS'
         output:
                 pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.rf_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.rf_model.RDS'
@@ -133,10 +135,10 @@ rule rf_train_all:
 # method svm, training crossvalidation
 rule svm_train:
         input:
-                sce_in =  INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
+                sce_in =  INPUTDIR + '{sample}.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.indexFold_{k_index}.RDS'
         output:
-                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.svm_predicted_labels.tsv'
+                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.svm_predicted_labels.csv'
         params:
                 lsfoutfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.svm_train.lsfout.log',
                 lsferrfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.svm_train.lsferr.log',
@@ -157,8 +159,8 @@ rule svm_train:
 # method svm, training, complete model
 rule svm_train_all:
         input:
-                sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
-                barcodes = METHOD_TRAIN_IN + '{sample}.indexAll.RDS'
+                sce_in = INPUTDIR + '{sample}.RDS',
+                barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS'
         output:
                 pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.svm_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.svm_model.RDS'
@@ -182,10 +184,10 @@ rule svm_train_all:
 # method fcNN, training crossvalidation
 rule fcnn_train:
         input:
-                sce_in =  INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
+                sce_in =  INPUTDIR + '{sample}.RDS',
                 barcodes = METHOD_TRAIN_IN + '{sample}.indexFold_{k_index}.RDS'
         output:
-                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_predicted_label.csv'
+                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_predicted_labels.csv'
         params:
                 lsfoutfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_train.lsfout.log',
                 lsferrfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.fcnn_train.lsferr.log',
@@ -206,8 +208,8 @@ rule fcnn_train:
 # method fcNN, training, complete model
 rule fcnn_train_all:
         input:
-                sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS',
-                barcodes = METHOD_TRAIN_IN + '{sample}.indexAll.RDS'
+                sce_in = INPUTDIR + '{sample}.RDS',
+                barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS'
         output:
                 pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_model.h5'
@@ -222,43 +224,45 @@ rule fcnn_train_all:
                 sample_name = "{sample}",
                 method_name = "fcnn"
         threads:
-                config['methods']['svm']['train']['threads']
+                config['methods']['fcnn']['train']['threads']
         benchmark:
-                METHOD_ALL_TRAIN_OUT + '{sample}.svm_train_all.benchmark'
+                METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_train_all.benchmark'
         shell:
-                config['methods']['svm']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
+                config['methods']['fcnn']['train']['call'] + ' --SCE {input.sce_in} --CVindex {input.barcodes} --outputDirec {params.output_dir} --sampleName {params.sample_name} --method {params.method_name}'
 
 # helper script - converts SCE to CDS (input for Garnett)
 rule sce_to_cds:
         input:
-                sce_in = INPUTDIR + '{sample}.genes_cells_filtered.corrected.RDS'
+                sce_in = INPUTDIR + '{sample}.RDS'
         output:
                 cds_out = CDS_OUT + '{sample}.monocle3_cds.RDS'
         params:
-                lsfoutfile = METHOD_TRAIN_OUT + '{sample}.sce_to_cds.lsfout.log',
-                lsferrfile = METHOD_TRAIN_OUT + '{sample}.sce_to_cds.lsferr.log',
+                lsfoutfile = CDS_OUT + '{sample}.sce_to_cds.lsfout.log',
+                lsferrfile = CDS_OUT + '{sample}.sce_to_cds.lsferr.log',
                 scratch = config['preprocessing']['sce_to_cds']['scratch'],
                 mem = config['preprocessing']['sce_to_cds']['mem'],
                 time = config['preprocessing']['sce_to_cds']['time'],
                 params = config['preprocessing']['sce_to_cds']['params'],
                 output_dir = CDS_OUT,
-                sample_name = "{sample}"
+                sample_name = "{sample}",
+                features_filepath = config['preprocessing']['sce_to_cds']['params']['features_filepath']
         threads:
                 config['preprocessing']['sce_to_cds']['threads']
         conda:
                 config['methods']['garnett']['conda']
         benchmark:
-                METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_train.benchmark'
+                CDS_OUT + '{sample}.sce_to_cds.benchmark'
         shell:
-                config['preprocessing']['sce_to_cds']['call'] + ' --sce_in {input.sce_in} --sample_name {params.sample_name} --cds_out {output.cds_out}'
+                config['preprocessing']['sce_to_cds']['call'] + ' --sce_in {input.sce_in} --sample_name {params.sample_name} --output_dir {params.output_dir} --features_file {params.features_filepath}'
 
 # method garnett, training, crossvalidation
 rule garnett_train:
         input:
                 cds_in =  CDS_OUT + '{sample}.monocle3_cds.RDS',
-                barcodes = METHOD_TRAIN_IN + '{sample}.indexFold_{k_index}.RDS'
+                barcodes = METHOD_TRAIN_IN + '{sample}.indexFold_{k_index}.RDS',
+                marker_file = MARKER_GENES_OUT + '{sample}.garnett.tsv'
         output:
-                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_predicted_labels.tsv'
+                pred_labels = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_predicted_labels.csv'
         params:
                 lsfoutfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_train.lsfout.log',
                 lsferrfile = METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_train.lsferr.log',
@@ -275,14 +279,16 @@ rule garnett_train:
         benchmark:
                 METHOD_TRAIN_OUT + '{sample}.indexFold_{k_index}.garnett_train.benchmark'
         shell:
-                config['methods']['garnett']['train']['call'] + ' --cds {input.cds_in} --barcodes_index {input.barcodes} --output_dir {params.output_dir} --pred_labels_out {output.pred_labels} --sample_name {params.sample_name}'
+                config['methods']['garnett']['train']['call'] + ' --cds {input.cds_in} --barcodes_index {input.barcodes} --output_dir {params.output_dir} --marker_file {input.marker_file} --sample_name {params.sample_name}'
 
 # method garnett, training, complete model
 rule garnett_train_all:
         input:
-                cds_in =  CDS_OUT + '{sample}.monocle3_cds.RDS'
+                cds_in =  CDS_OUT + '{sample}.monocle3_cds.RDS',
+                barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS',
+                marker_file = MARKER_GENES_OUT + '{sample}.garnett.tsv'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_predicted_labels_all.tsv',
+                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_model.RDS'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_train_all.lsfout.log',
@@ -300,11 +306,11 @@ rule garnett_train_all:
         benchmark:
                 METHOD_ALL_TRAIN_OUT + '{sample}.garnett_train_all.benchmark'
         shell:
-                config['methods']['garnett']['train']['call'] + ' --cds {input.cds_in} --output_dir {params.output_dir} --pred_labels_out {output.pred_labels} --sample_name {params.sample_name}'
+                config['methods']['garnett']['train']['call'] + ' --cds {input.cds_in} --barcodes_index {input.barcodes} --output_dir {params.output_dir} --marker_file {input.marker_file} --sample_name {params.sample_name}'
 
 # helper function to retrieve files necessary for the crossvalidation evaluation
 def getTrainedSubsets(wildcards):
-        return expand(METHOD_TRAIN_OUT + wildcards.sample + '.indexFold_{k_index}.{method}_predicted_labels.tsv', k_index = K_FOLD_INDEX, method = SELECTED_METHODS)
+        return expand(METHOD_TRAIN_OUT + wildcards.sample + '.indexFold_{k_index}.{method}_predicted_labels.csv', k_index = K_FOLD_INDEX, method = SELECTED_METHODS)
 
 if not 'CV_SUMMARY_IN' in globals():
     CV_SUMMARY_IN = INPUTDIR
@@ -313,7 +319,7 @@ if not 'CV_SUMMARY_IN' in globals():
 rule cv_summary_train:
         input:
                 cv_files = getTrainedSubsets,
-                sce_in = CV_SUMMARY_IN + "{sample}.genes_cells_filtered.corrected.RDS"
+                sce_in = CV_SUMMARY_IN + "{sample}.RDS"
         output:
                 METHOD_TRAIN_OUT + '{sample}.cv_summary.tsv'
         params:

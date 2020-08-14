@@ -1,4 +1,6 @@
-# Adapted from (Abdelaal et al. 2019) https://github.com/tabdelaal/scRNAseq_Benchmark - script(s): evaluate.R 
+# Adapted from (Abdelaa et al. 2019) https://github.com/tabdelaal/scRNAseq_Benchmark - script(s): evaluate.R 
+
+library(optparse)
 
 option_list = list(
   make_option("--sce", type = "character", help = "Path to SCE object w/ ground-truth annotations."),
@@ -13,11 +15,17 @@ opt = parse_args(opt_parser)
 
 
 evaluate_classifier <- function(sce, predicted_labels_path, indices = NULL){
+  print("Loading SCE...")
   sce <- readRDS(opt$sce)
-  true_labels <- sce@meta.data$ground_truth_major
+  true_labels <- sce@metadata$ground_truth_major
   rm(sce)
   #true_labels <- unlist(read.csv(true_labels_path))
-  predicted_labels <- unlist(read.csv(predicted_labels_path))
+  print("Reading predicted labels...")
+  predicted_labels <- read.csv(predicted_labels_path)
+  
+  if (dim(predicted_labels)[2] > 1){
+    predicted_labels <- predicted_labels[,2]
+  } else{predicted_labels <- unlist(predicted_labels)}
   
   if (! is.null(indices)){
     true_labels <- true_labels[indices]
@@ -28,6 +36,9 @@ evaluate_classifier <- function(sce, predicted_labels_path, indices = NULL){
   unique_predicted <- unlist(unique(predicted_labels))
   unique_all <- unique(c(unique_true,unique_predicted))
   
+  print(paste("True labels (total, unique):",length(unique_true),length(true_labels)))
+  print(paste("Predicted labels (total, unique):",length(unique_predicted),length(predicted_labels)))
+  
   confusion_matrix <- table(true_labels,predicted_labels)
   pop_size <- rowSums(confusion_matrix)
   predicted_labels = gsub('Node..','Node',predicted_labels)
@@ -35,7 +46,7 @@ evaluate_classifier <- function(sce, predicted_labels_path, indices = NULL){
 
   f1_score <- vector()
   sum_acc <- 0
-  
+  print("Calculating F1 score...")
   for (i in c(1:length(unique_true))){
     find_label = colnames(confusion_matrix_f1_score) == row.names(confusion_matrix_f1_score)[i]
     if(sum(find_label)){
@@ -66,8 +77,9 @@ evaluate_classifier <- function(sce, predicted_labels_path, indices = NULL){
 }
 
 results <- evaluate_classifier(opt$sce, opt$predicted_labels_path)
-write.csv(results$conf, file.path(opt$output_dir,opt$sample_name, ".confusion_", paste0(opt$method_name, ".csv")))
-write.csv(results$f1_score, file.path(opt$output_dir,opt$sample_name, ".f1-score_", paste0(opt$method_name, ".csv")))
-write.csv(results$population_size, file.path(opt$output_dir, opt$sample_name,".population-size_", paste0(opt$method_name, ".csv")))
+print("Saving results...")
+write.csv(results$conf, paste0(opt$output_dir,opt$sample_name, ".confusion_", paste0(opt$method_name, ".csv")))
+write.csv(results$f1_score, paste0(opt$output_dir,opt$sample_name, ".f1-score_", paste0(opt$method_name, ".csv")))
+write.csv(results$population_size, paste0(opt$output_dir, opt$sample_name,".population-size_", paste0(opt$method_name, ".csv")))
 df <- data.frame(results[c("median_f1_score", "accuracy", "percent_unlabeled")])
-write.csv(df, file.path(opt$output_dir, opt$sample_name, ".summary_", paste0(opt$method_name, ".csv")))
+write.csv(df, paste0(opt$output_dir, opt$sample_name, ".summary_", paste0(opt$method_name, ".csv")))
