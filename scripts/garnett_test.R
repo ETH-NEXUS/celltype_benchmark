@@ -9,8 +9,8 @@ library(org.Hs.eg.db)
 
 option_list = list(
   make_option("--cds", type = "character", help = "Path to RDS file with cds object stored inside."),
-  make_option("--output_dir", type = "character", help = "Path to the directory where output files will be written."),
-  make_option("--sample_name", type = "character", help = "Sample identifier. Attached to each output name."),
+  make_option("--outputFile", type = "character", help = "Path to the output file."),
+#  make_option("--sample_name", type = "character", help = "Sample identifier. Attached to each output name."),
   make_option("--classifier", type="character", help = "Path to pre-trained Garnett classifier generated in training step.")
 )
 
@@ -43,6 +43,9 @@ pred_labels <- list(pData(cds)$cluster_ext_type)
 
 print("Writing predicted labels...")
 #write.csv(true_labels,paste0(opt$output_dir,'/Garnett_CV_true.csv'),row.names = FALSE)
-write.csv(pred_labels,paste0(opt$output_dir, opt$sample_name, '.garnett_CV_pred.csv'),row.names = FALSE)
-write.csv(test_time,paste0(opt$output_dir, opt$sample_name, '.garnett_CV_test_time.csv'),row.names = FALSE)
+write.csv(pred_labels,opt$outputFile,row.names = FALSE)
+write.csv(test_time,paste0(opt$outputFile,'_test_time.csv'),row.names = FALSE)
+
+#write.csv(pred_labels,paste0(opt$output_dir, opt$sample_name, '.garnett_CV_pred.csv'),row.names = FALSE)
+#write.csv(test_time,paste0(opt$output_dir, opt$sample_name, '.garnett_CV_test_time.csv'),row.names = FALSE)
 print("Done!")

@@ -21,18 +21,17 @@ library(keras)
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
   make_option("--nn_model", type = "character", help = "Path to the file containing the pretrained fcNN model."),
-  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
-  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name."),
-  make_option("--method", type = "character", help = "Method identifier. Attached to each output name.")
+  make_option("--outputFile", type = "character", help = "Path to the output file.")
+#  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name."),
+#  make_option("--method", type = "character", help = "Method identifier. Attached to each output name.")
 )
 
 opt_parser = OptionParser(option_list = option_list)
 opt = parse_args(opt_parser)
 
-
 # Parameters
 '%&%' = function(a,b) paste(a,b,sep="")
-path = opt$outputDirec %&% opt$sampleName
+#path = opt$outputDirec %&% opt$sampleName
 
 ################################################################################
 ## main code starts here
@@ -57,6 +56,7 @@ res <- as.character(tmp2)
 for(i in 1:length(lev)){
   res[tmp2 %in% i] <- lev[i]
 }
-write.csv(res,path %&% "." %&% opt$method %&%
-            "_predicted_test_label.csv",quote = F,row.names = F)
+write.csv(res,opt$outputFile)
+#write.csv(res,path %&% "." %&% opt$method %&%
+#            "_predicted_test_label.csv",quote = F,row.names = F)
 #confusionMatrix(data_nn[,1],factor(res,levels=levels(data_nn[,1])))

@@ -20,9 +20,9 @@ library(SingleCellExperiment)
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
   make_option("--rf_model", type = "character", help = "Path to the file containing the pretrained RF model."),
-  make_option("--outputDirec", type = "character", help = "Path to the directory where output files will be written."),
-  make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name."),
-  make_option("--method", type = "character", help = "Method identifier. Attached to each output name.")
+  make_option("--outputFile", type = "character", help = "Path to output file.")
+  #make_option("--sampleName", type = "character", help = "Sample identifier. Attached to each output name."),
+  #make_option("--method", type = "character", help = "Method identifier. Attached to each output name.")
 )
 
 opt_parser = OptionParser(option_list = option_list)
@@ -31,7 +31,7 @@ opt = parse_args(opt_parser)
 
 # Parameters
 '%&%' = function(a,b) paste(a,b,sep="")
-path = opt$outputDirec %&% opt$sampleName
+#path = opt$outputDirec %&% opt$sampleName
 
 ################################################################################
 ## main code starts here
@@ -59,6 +59,7 @@ pred.rf[idx.unk] <- "unknown"
 
 ################################################################################
 ## save predicted labels
-write.csv(pred.rf,path %&% "." %&%
-            opt$method %&% "_predicted_test_labels.csv")
+write.csv(pred.rf,opt$outputFile)
+#write.csv(pred.rf,path %&% "." %&%
+#            opt$method %&% "_predicted_test_labels.csv")
 #confusionMatrix(data_rf[,1],factor(pred.rf,levels=levels(data_rf[,1])))
