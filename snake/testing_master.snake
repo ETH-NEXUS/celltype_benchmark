@@ -22,7 +22,6 @@ if not 'TMPDIR' in globals():
     sys.exit(1)
 
 # Include the rules
-#include: "training_rules.py"
 include: "testing_rules.py"
 
 SELECTED_METHODS = config['resources']['celltype_methods']
@@ -39,17 +38,11 @@ CELLTYPING_OUT = OUTDIR + "celltyping/"
 
 # Include the rules
 include: "testing_rules.py"
-dult_subset.rf_model.RDS
 localrules: all
 rule all:
 	input:
-		expand(CELLTYPING_OUT + '{sample}/{method}/predicted_labels.{model}.csv', sample = get_sample_names(), method = SELECTED_METHODS, model = TRAINED_MODELS)
-		expand(METHOD_TEST_IN + "{sample}.{method}_model.RDS", sample = get_sample_names(), method = get_method_names(SELECTED_METHODS), model = get_model_names()),
-                expand(METHOD_TEST_OUT + "{sample}.{method}.predicted_labels.csv", sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
-                expand(METHOD_TEST_OUT + '{sample}.confusion_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
-                expand(METHOD_TEST_OUT + '{sample}.f1-score_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
-                expand(METHOD_TEST_OUT + '{sample}.population-size_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS)),
-                expand(METHOD_TEST_OUT + '{sample}.summary_{method}.csv', sample = get_sample_names(), method = get_method_names(SELECTED_METHODS))
+		expand(CELLTYPING_OUT + '{sample}/{method}/predicted_labels.{model}.csv', sample = get_sample_names(), method = SELECTED_METHODS, model = TRAINED_MODELS),
+                expand(CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.csv', sample = get_sample_names())
 	output:
 		OUTDIR + "complete_testing.txt"
 	params:
