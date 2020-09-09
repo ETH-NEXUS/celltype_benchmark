@@ -1,0 +1,32 @@
+Dictionary_original	Dictionary_matched
+cd14_monocytes_fastqs	Monocytes
+CD14+ monocyte type 1	Monocytes
+CD14+ monocyte type 2	Monocytes
+CD16+ monocyte	Monocytes
+cd4_t_helper_fastqs	T.cells.CD4
+CD4+ naive T cell	T.cells.CD4
+T-helper cell	T.cells.CD4
+CD4+ T cell	T.cells.CD4
+naive T-helper cell type 1	T.cells.CD4
+naive T-helper cell type 2	T.cells.CD4
+cytotoxic_t_fastqs	T.cells.CD8
+naive_cytotoxic_fastqs	T.cells.CD8
+cytotoxic T cell type 1	T.cells.CD8
+cytotoxic T cell type 2	T.cells.CD8
+naive CD8+ T cell	T.cells.CD8
+regulatory_t_fastqs	T.cells.regulatory
+T-helper cell including regulatory T cell	T.cells.CD4
+conventional dendritic cell	Dendritic.cells
+dendritic cell	Dendritic.cells
+memory B cell	B.cells.memory
+naive B cell	B.cells.naive
+precursor B cell	B.cells.precursor
+pro-B cell	B.cells.precursor
+plasma cell	Plasma.cells
+plasmacytoid dendritic cell	Plasmacytoid.dendritic.cells
+natural killer cell	NK.cells
+natural killer cell type 1	NK.cells
+natural killer cell type 2	NK.cells
+b_cells_fastqs	B.cells
+cd34_fastqs	Stem.cells
+cd56_nk_fastqs	NK.cells
