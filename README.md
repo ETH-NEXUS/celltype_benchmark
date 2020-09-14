@@ -51,6 +51,10 @@ See **Usage** below for an example of how this would be run.
 
 In the future, a pre-installed conda environment will be provided on Leomed so that a new conda environment will not be installed for each new run of the pipelines.
 
+In the meanwhile, a conda environment can be used as follows:
+`conda activate /cluster/work/nexus/marcus/miniconda3/envs/garnett/`
+However, using this environment means you must not use the `--use-conda` mode of Snakemake.
+
 ## Input data:
 Required input data:
 
