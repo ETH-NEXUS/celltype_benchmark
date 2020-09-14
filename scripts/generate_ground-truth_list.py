@@ -112,18 +112,38 @@ if(mode == "broad"):
   
 elif(mode == "zheng"):
 #Zheng:
-    with open(barcode_path) as f:
+    zheng_label_references = {
+  "-1":"b_cells_fastqs",
+  "-2":"cd14_monocytes_fastqs",
+  "-3":"cd34_fastqs",
+  "-4":"cd4_t_helper_fastqs",
+  "-5":"cd56_nk_fastqs",
+  "-6":"cytotoxic_t_fastqs",
+  "-7":"memory_t_fastqs",
+  "-8":"naive_cytotoxic_fastqs",
+  "-9":"naive_t_fastqs",
+  "10":"regulatory_t_fastqs",
+}
+    with open(opt.original_labels) as f:
         for barcode in f:
-          barcode = line.split("\t")[0]
-          cell_type = barcode.strip()[-2:]
+          barcode = barcode.strip()
+          cell_type = barcode[-2:]
           in_list.append(cell_type)
-          for k,v in label_references.items():
+          for k,v in label_dict.items():
               if re.search(pattern=k.lower(), string=zheng_label_references[cell_type].lower()):
+                  cell_type = zheng_label_references[cell_type].lower()
+                  coerced_type_major = ""
+                  for major,subtype in subtype_dict.items():
+                      if(v in subtype):
+                          coerced_type_major = major
+                      elif(v in major):
+                          coerced_type_major = v
+                          v = "none"
+                          break
                   #out_list.append(v)
-                  out_file.write(barcode.strip()+"\t"+zheng_label_references[cell_type]+"\t"+v+"\n")
-                  print(k,"------",cell_type)
+                  out_file.write(barcode+"\t"+cell_type+"\t"+coerced_type_major+"\t"+v+"\n")
+                  #print(k,"------",cell_type)
                   break
-
     out_file.close()
 
 
