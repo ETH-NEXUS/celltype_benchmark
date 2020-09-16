@@ -30,3 +30,5 @@ natural killer cell type 2	NK.cells
 b_cells_fastqs	B.cells
 cd34_fastqs	Stem.cells
 cd56_nk_fastqs	NK.cells
+naive_t_fastqs	T.cells.CD4
+memory_t_fastqs	T.cells.CD4

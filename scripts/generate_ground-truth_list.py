@@ -91,11 +91,11 @@ if(mode == "broad"):
        in_list.append(cell_type)
       # for k,v in label_references.items():
        for k,v in label_dict.items():
-           if re.search(pattern=k, string=cell_type):
+           if re.match(pattern=k, string=cell_type) or k == cell_type:
                out_list.append(v)
                coerced_type_major = ""
                for major,subtype in subtype_dict.items():
-                   print(k,v,major,subtype)
+                   #print(k,v,major,subtype)
                    if(v in subtype):
                        coerced_type_major = major
                    elif(v in major):
@@ -106,7 +106,6 @@ if(mode == "broad"):
                out_file.write(barcode+"\t"+cell_type+"\t"+coerced_type_major+"\t"+v+"\n")
                   #print(k,"------",cell_type)
                break
-
     out_file.close()
 #print(out_list)
   
@@ -130,7 +129,7 @@ elif(mode == "zheng"):
           cell_type = barcode[-2:]
           in_list.append(cell_type)
           for k,v in label_dict.items():
-              if re.search(pattern=k.lower(), string=zheng_label_references[cell_type].lower()):
+              if re.search(pattern=k.lower(), string=zheng_label_references[cell_type].lower()) or k.lower() == zheng_label_references[cell_type].lower():
                   cell_type = zheng_label_references[cell_type].lower()
                   coerced_type_major = ""
                   for major,subtype in subtype_dict.items():
