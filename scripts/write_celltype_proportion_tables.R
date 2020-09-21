@@ -8,10 +8,10 @@ library(kableExtra)
 option_list = list(
   make_option("--data_full", type = "character", help = "Path to RDS file with full CDS data object."),
   make_option("--data_subset", type = "character", help = "Path to RDS file with subsetted CDS data object."),
-  make_option("--data_raw", type = "character", help = "Path to RDS file with full CDS data object."),
-  make_option("--data_subset_raw", type = "character", help = "Path to RDS file with subsetted CDS data object."),
-  make_option("--data_dict", type = "character", help = "Path to the directory where output files will be written."),
-  make_option("--output", type = "character", help = "Directory to where final table will be written."),
+  make_option("--data_raw", type = "character", help = "Path to barcodes file from cellranger count output."),
+  make_option("--data_subset_raw", type = "character", help = "Path to HDF5 file containing subsetted raw counts data."),
+  make_option("--data_dict", type = "character", help = "Path to the ground-truth dictionary file mapping cell types barcodes."),
+  make_option("--output", type = "character", help = "Directory to where final table(s) will be written."),
   make_option("--sample_name", type = "character", help = "Name of sample to prepend to output table file name.")
 )
 
