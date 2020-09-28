@@ -1,0 +1,22 @@
+Original label	Matched GT label
+B.cells_normal_Newman15.MERGED	B.cells
+B.cells.naive_normal_Newman15	B.cells.naive
+B.cells.memory_normal_Newman15	B.cells.memory
+Plasma.cells_normal_Newman15	Plasma.cells
+T.cells_melanoma_Tirosh16	T.cells
+T.cells.CD8_normal_Newman15	T.cells.CD8
+T.cells.CD4.naive_normal_Newman15	T.cells.CD4
+T.cells.CD4.memory.resting_normal_Newman15	delete
+T.cells.CD4.memory.activated_normal_Newman15	delete
+T.cells.regulatory_normal_Newman15	T.cells.regulatory
+T.cells.gamma.delta_normal_Newman15	delete
+NK.cells_normal_Newman15.MERGED	NK.cells
+Myeloid.cell.Blood_Normal_Zhang18	delete
+Monocytes_normal_Newman15	Monocytes
+Dendritic.cells_normal_Newman15.MERGED	Dendritic.cells
+CD141.CLEC9A.dendritic.cell_Normal_Zhang18	delete
+CD1C.A.dendritic.cell_Normal_Zhang18	delete
+CD1C.B.dendritic.cell_Normal_Zhang18	delete
+CD1Cmin.CD141min.dendr.cell_Normal_Zhang18	delete
+AXL.SIGLEC6.dendritic.cell_Normal_Zhang18	delete
+Plasmacytoid.dendritic.cell_Normal_Zhang18	Plasmacytoid.dendritic.cells
