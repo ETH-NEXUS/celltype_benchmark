@@ -220,7 +220,7 @@ Their pre-processing, processing, and annotation steps are detailed below.
 Unless otherwise specified, the paths link to files on Leomed.
 
 ##########################################
-#           Table of contents            #
+            Table of contents            
 ##########################################
 [1] Zheng
     (a) Pre-processing (cellranger count & aggr)
@@ -419,9 +419,8 @@ Output directory: /cluster/work/nexus/benchmarking/celltyping/data/summary_table
 
 - Proportions table: /cluster/work/nexus/benchmarking/celltyping/data/summary_tables/Zheng/Zheng_true_labels_table.tx
 
-##############################################################################################################################
-##############################################################################################################################
-##############################################################################################################################
+----------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------
 
 ## [2] 2020-Mar-Census-Adult-Immune-10x datase
 Adult PBMC dataset (preprocessed) retrieved from the Broad Institute.
@@ -533,11 +532,10 @@ Output directory: /cluster/dataset/nexus/benchmarking/celltyping/data/summary_ta
 
 - Proportions table: /cluster/work/nexus/benchmarking/celltyping/data/summary_tables/adult/Adult_true_labels_table.tx
 
-##############################################################################################################################
-##############################################################################################################################
-##############################################################################################################################
+----------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------
 
-[3] 2020-Mar-Census-Newborn-Blood-10x datase
+# [3] 2020-Mar-Census-Newborn-Blood-10x datase
 Newborn PBMC dataset (preprocessed) retrieved from the Broad Institute.
 See /cluster/work/nexus/benchmarking/celltyping/data/broad/readme.txt for more details.
 
