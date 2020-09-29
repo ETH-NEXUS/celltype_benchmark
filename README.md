@@ -219,9 +219,10 @@ Their pre-processing, processing, and annotation steps are detailed below.
 
 Unless otherwise specified, the paths link to files on Leomed.
 
-##########################################
-            Table of contents            
-##########################################
+#####################
+  Table of contents            
+#####################
+
 [1] Zheng
     (a) Pre-processing (cellranger count & aggr)
     (b) Processing
@@ -245,9 +246,9 @@ Unless otherwise specified, the paths link to files on Leomed.
     (d) Cell type proportions table
     (e) Summary of file paths
 
-##########################################
+######################
 Pre-processing and processing necessary for each respective datase
-##########################################
+#####################
 
 ## [1] Zheng data set
 Consists of 10 FACS sorted immune cell populations which are then merged into one dataset.
