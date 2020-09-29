@@ -4,32 +4,13 @@ input_output:
     output_dir: "/path/to/output/"
     tmp_dir: "/path/to/tmp/"
 
-
 resources:
     conda_path: ""
-    snakemake_path: ""
-    celltype_methods: ["svm","rf","garnett","scROSI"]
-    trained_models: ["svm","rf","garnett"],
-    celltype_config: "/cluster/project/nexus/benchmarking/celltyping/git/marker_files/PBMC/celltype_config_PBMC.txt"
+    celltype_methods: ["svm","rf","garnett","fcnn"]
+    trained_models: ["svm","rf","garnett","fcnn"],
+    celltype_config_gt: "/cluster/project/nexus/benchmarking/celltyping/git/marker_files/PBMC/celltype_config_PBMC_groundtruth.txt"
 
 statistics:
-
-  cross_validation:
-    call: "/cluster/project/nexus/benchmarking/celltyping/git/scripts/cv_k_folds.R"
-    scratch: "1000"
-    mem: "1000"
-    time: "200"
-    threads: 1
-    k_folds: 10
-    params: ""
-
-  cv_summary:
-    call: "/cluster/project/nexus/benchmarking/celltyping/git/scripts/cv_summary.R"
-    scratch: "1000"
-    mem: "1000"
-    time: "200"
-    threads: 1
-    params: ""
 
   calc_accuracy:
     call: ""
@@ -75,7 +56,7 @@ methods:
       mem: "1000"
       time: "200"
       threads: 1
-  
+
   fcnn:
     test:
       call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/fcNN_test.R"
@@ -93,6 +74,13 @@ methods:
       threads: 1
       params: ""
     conda: "/cluster/project/nexus/benchmarking/celltyping/docs/conda_envs/garnett.yaml"
+
+  prep_scROSI_config:
+      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/prepare_scROSI_config.py"
+      scratch: "2000"
+      mem: "2000"
+      time: "200"
+      threads: 1
 
   scROSI:
       call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/scROSI.R"

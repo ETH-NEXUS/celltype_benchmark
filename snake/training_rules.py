@@ -41,7 +41,8 @@ rule find_markers:
         input:
                 sce_in =  MARKER_GENES_IN + '{sample}.RDS'
         output:
-                gmx_out = MARKER_GENES_OUT + '{sample}.gmx'
+                gmx_out = MARKER_GENES_OUT + '{sample}.gmx',
+		tsv_garnett_out = MARKER_GENES_OUT + '{sample}.garnett.tsv'
         params:
                 lsfoutfile = MARKER_GENES_OUT + '{sample}.find_markers.lsfout.log',
                 lsferrfile = MARKER_GENES_OUT + '{sample}.find_markers.lsferr.log',
@@ -57,26 +58,6 @@ rule find_markers:
                 MARKER_GENES_OUT + '{sample}.find_markers.benchmark'
         shell:
                 config['markers']['find_markers']['call'] + ' --SCE {input.sce_in} --outputDirec {params.output_dir}  --sampleName {params.sample_name}'
-
-# convert from gmx to tsv
-rule convert_markers:
-        input:
-                gmx_in = MARKER_GENES_OUT + '{sample}.gmx'
-        output:
-                tsv_out = MARKER_GENES_OUT + '{sample}.garnett.tsv'
-        params:
-                lsfoutfile = MARKER_GENES_OUT + '{sample}.convert_markers.lsfout.log',
-                lsferrfile = MARKER_GENES_OUT + '{sample}.convert_markers.lsferr.log',
-                scratch = config['markers']['convert_markers']['scratch'],
-                mem = config['markers']['convert_markers']['mem'],
-                time = config['markers']['convert_markers']['time'],
-                params = config['markers']['convert_markers']['params']
-        threads:
-                config['markers']['convert_markers']['threads']
-        benchmark:
-                MARKER_GENES_OUT + '{sample}.convert_markers.benchmark'
-        shell:
-                config['markers']['convert_markers']['call'] + ' --input_gmx {input.gmx_in} --output_tsv {output.tsv_out}'
 
 if not 'METHOD_TRAIN_IN' in globals():
     METHOD_TRAIN_IN = CV_FOLD_OUT

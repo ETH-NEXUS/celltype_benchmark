@@ -93,29 +93,50 @@ rule garnett_test:
 
 if not 'SCROSI_IN' in globals():
     SCROSI_IN = OUTDIR + "marker_genes/"
+
+# prep config file based on present cell types, for scROSI
+rule prepare_scROSI_config_file:
+	input:
+		celltype_gmx = SCROSI_IN + '{sample}.gmx'
+	output:
+		celltype_config = SCROSI_IN + '{sample}.celltype_config.tsv'
+	params:
+                lsfoutfile = SCROSI_IN + '{sample}.prep_celltype_config.lsfout.log',
+                lsferrfile = SCROSI_IN + '{sample}.prep_celltype_config.lsferr.log',
+                scratch = config['methods']['prep_scROSI_config']['scratch'],
+                mem = config['methods']['prep_scROSI_config']['mem'],
+                time = config['methods']['prep_scROSI_config']['time']
+		celltype_config_gt = config['resources']['celltype_config_gt']
+        threads:
+                config['methods']['prep_scROSI_config']['threads']
+        benchmark:
+                SCROSI_IN + '{sample}.prep_celltype_config.benchmark'
+        shell:
+                config['methods']['prep_scROSI_config']['call'] + ' --gmx {input.celltype_gmx} --config_groundtruth {params.celltype_config_gt} --outfile {output.celltype_config}'
+
 # scROSI, testing
 rule scROSI:
         input:
-                sce_in =  INPUTDIR + '{sample}.RDS', 
-                gmx_in = SCROSI_IN + '{model}.gmx'
+                sce =  INPUTDIR + '{sample}.RDS', 
+                celltype_gmx = SCROSI_IN + '{sample}.gmx',
+		celltype_config = SCROSI_IN + '{sample}.celltype_config.tsv'
         output:
-                pred_labels = CELLTYPING_OUT + '{sample}/scROSI/predicted_labels_{model}.csv'
+                pred_labels = CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.csv'
         params:
-                lsfoutfile = CELLTYPING_OUT + '{sample}.nexus_test.lsfout.log',
-                lsferrfile = CELLTYPING_OUT + '{sample}.nexus_test.lsferr.log',
-                scratch = config['methods']['nexus']['test']['scratch'],
-                mem = config['methods']['nexus']['test']['mem'],
-                time = config['methods']['nexus']['test']['time'],
-                params = config['methods']['nexus']['test']['params'],
-                output_dir = CELLTYPING_OUT,
-                sample_name = "{sample}",
-                method_name = "nexus"
+                lsfoutfile = CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.lsfout.log',
+                lsferrfile = CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.lsferr.log',
+                scratch = config['methods']['scROSI']['scratch'],
+                mem = config['methods']['scROSI']['mem'],
+                time = config['methods']['scROSI']['time'],
+                params = config['methods']['scROSI']['params'],
+		outputDirec = CELLTYPING_OUT,
+		sampleName = '{sample}',
         threads:
-                config['methods']['nexus']['test']['threads']
+                config['methods']['scROSI']['threads']
         benchmark:
-                CELLTYPING_OUT + '{sample}.nexus_test.benchmark'
+                CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.benchmark'
         shell:
-                config['methods']['nexus']['test']['call'] + ' --SCE {input.sce_in} --marker_list {input.gmx_in} --outputDirec {params.output_dir} --sampleName {params.sample_name} -- method {params.method_name}'
+                config['methods']['scROSI']['call'] + ' --SCE {input.sce} --celltype_lists {input.celltype_gmx} --celltype_config {input.celltype_config} --outputDirec {params.outputDirec}/{params.sampleName}/scROSI/ --sampleName {params.sampleName}'
 
 # evaluate models & calculate accuracy statistics (F1-score)
 rule evaluate_classifier:

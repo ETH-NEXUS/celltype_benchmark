@@ -54,9 +54,6 @@ rule all:
                 expand(MARKER_GENES_OUT + '{sample}.gmx', sample = get_sample_names()),
                 expand(METHOD_TRAIN_OUT + '{sample}.indexFold_{k_fold}.{method}_predicted_labels.csv', sample = get_sample_names(), method = SELECTED_METHODS, k_fold = K_FOLD_INDEX),
                 expand(METHOD_ALL_TRAIN_OUT + '{sample}.{method}_model.RDS', sample = get_sample_names(), method = SELECTED_METHODS),
-                #expand(METHOD_ALL_TRAIN_OUT + '{sample}.fcnn_model.h5', sample = get_sample_names()),
-                expand(CV_SUMMARY_OUT + '{sample}_byClass.csv', sample = get_sample_names()),
-                expand(CV_SUMMARY_OUT + '{sample}_F1.csv', sample = get_sample_names()),
                 expand(CV_SUMMARY_OUT + '{sample}_overall.csv', sample = get_sample_names())
         output:
                 OUTDIR + "complete_training.txt"
