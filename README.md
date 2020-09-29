@@ -353,7 +353,7 @@ Prior to the run, a symbolic link to the subset hdf5 file is created in the pipe
 For the benchmark, the data must first be labeled with the true cell types per barcode.
 To do this, a file (hereafter referred to as a ground-truth dictionary) mapping the labels to each barcode must be generated.
 Note that this only needs to be done once per (full) data set.
-Please see the documentation on the celltyping_benchmark Git repo for examples and required formatting of the input files needed.
+Please see the documentation earlier in this readme for examples and required formatting of the input files needed.
 
 Command used to generate ground-truth dictionary for the Zheng data:
 `python /cluster/work/nexus/benchmarking/celltyping/git/scripts/generate_ground-truth_list.py --original_labels /cluster/work/nexus/benchmarking/celltyping/preprocessing_runs/Zheng_cellranger_merge/cellranger_aggr_output/outs/filtered_feature_bc_matrix/barcodes.tsv --label_dictionary /cluster/work/nexus/benchmarking/celltyping/git/doc/matched_types_dictionary.tsv --output /cluster/work/nexus/benchmarking/celltyping/data/zheng_sorted/zheng_ground_truth.tsv --subtype_dictionary /cluster/work/nexus/benchmarking/celltyping/data/major_subtype_mapping.txt`
@@ -476,7 +476,7 @@ Prior to the run, a symbolic link to the subset hdf5 file is created in the pipe
 For the benchmark, the data must first be labeled with the true cell types per barcode.
 To do this, a file (hereafter referred to as a ground-truth dictionary) mapping the labels to each barcode must be generated.
 Note that this only needs to be done once per (full) data set.
-Please see the documentation on the celltyping_benchmark Git repo for examples and required formatting of the input files needed.
+Please see the documentation earlier in this readme for examples and required formatting of the input files needed.
 
 Command used to generate ground-truth dictionary for the Adult PBMC data:
 `python /cluster/work/nexus/benchmarking/celltyping/git/scripts/generate_ground-truth_list.py --original_labels /cluster/work/nexus/benchmarking/celltyping/data/broad/2020-Mar-Census-Adult-Immune-10x/2020-Mar-Census-Adult-Immune-10x_annotated_v1.scp.metadata.txt --label_dictionary /cluster/work/nexus/benchmarking/celltyping/git/doc/matched_types_dictionary.tsv --output /cluster/work/nexus/benchmarking/celltyping/data/broad/2020-Mar-Census-Adult-Immune-10x/2020-Mar-Census-Adult-Immune-10x.ground_truth.tsv --subtype_dictionary /cluster/work/nexus/benchmarking/celltyping/data/major_subtype_mapping.txt`
@@ -589,7 +589,7 @@ Prior to the run, a symbolic link to the subset hdf5 file is created in the pipe
 For the benchmark, the data must first be labeled with the true cell types per barcode.
 To do this, a file (hereafter referred to as a ground-truth dictionary) mapping the labels to each barcode must be generated.
 Note that this only needs to be done once per (full) data set.
-Please see the documentation on the celltyping_benchmark Git repo for examples and required formatting of the input files needed.
+Please see the documentation earlier in this readme for examples and required formatting of the input files needed.
 
 Command used to generate ground-truth dictionary for the Adult PBMC data:
 `python /cluster/work/nexus/benchmarking/celltyping/git/scripts/generate_ground-truth_list.py --original_labels /cluster/work/nexus/benchmarking/celltyping/data/broad/2020-Mar-Census-Newborn-Blood-10x/2020-Mar-Census-Newborn-Blood-10x_annotated_v1.scp.metadata.txt --label_dictionary /cluster/work/nexus/benchmarking/celltyping/git/doc/matched_types_dictionary.tsv --output /cluster/work/nexus/benchmarking/celltyping/data/broad/2020-Mar-Census-Newborn-Blood-10x/2020-Mar-Census-Newborn-Blood-10x.ground_truth.tsv --subtype_dictionary /cluster/work/nexus/benchmarking/celltyping/data/major_subtype_mapping.txt`
