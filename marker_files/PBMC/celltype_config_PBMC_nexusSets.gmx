@@ -1,4 +1,4 @@
-B.cells.naive_normal_Newman15	B.cells.memory_normal_Newman15	Plasma.cells_normal_Newman15	T.cells.CD8_normal_Newman15	T.cells.CD4.naive_normal_Newman15	T.cells.regulatory_normal_Newman15	Monocytes_normal_Newman15	B.cells_normal_Newman15.MERGED	NK.cells_normal_Newman15.MERGED	Dendritic.cells_normal_Newman15.MERGED	Plasmacytoid.dendritic.cell_Normal_Zhang18	T.cells_melanoma_Tirosh16
+B.cells.naive	B.cells.memory	Plasma.cells	T.cells.CD8	T.cells.CD4	T.cells.regulatory	Monocytes	B.cells_normal	NK.cells	Dendritic.cells	Plasmacytoid.dendritic.cell	T.cells
 											
 ABCB4	ADAM28	ABCB9	BCL11B	ACAP1	BARX2	AIF1	ABCB4	APOBEC3G	ACP5	SEPT11	CD2
 ADAM28	AIM2	AMPD1	CCL5	ANKRD55	BCL11B	APOBEC3A	ADAM28	APOL6	AIF1	ABCA2	CD3D
