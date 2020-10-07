@@ -1,5 +1,4 @@
 import argparse
-import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--gmx', metavar='type=string',
