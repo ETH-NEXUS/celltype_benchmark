@@ -43,8 +43,15 @@ print("Combined config cell types: ", all_types, "\n")
 print("\n", "#"*20, "\n", "Matches between GMX and config file:", "\n", "#"*20, "\n")
 matched_types = [cell_type for cell_type in gmx_header if cell_type in all_types]
 print("Matching cell types: ", matched_types)
-print("Cell types in config file but not in GMX: ", [cell_type for cell_type in all_types if not cell_type in gmx_header])
-print("Cell types in GMX but not in config file: ", [cell_type for cell_type in gmx_header if not cell_type in all_types])
+
+types_in_config_only = [cell_type for cell_type in all_types if not cell_type in gmx_header]
+types_in_gmx_only = [cell_type for cell_type in gmx_header if not cell_type in all_types]
+
+if types_in_config_only:
+    print("Cell types in config file but not in GMX: ", types_in_config_only, "\n")
+if types_in_gmx_only:
+    print("\033[1m" + "WARNING: Config file is missing cell types found in GMX. Make sure config file is correct." + "\033[0m")
+    print("Cell types in GMX but not in config file: ", [cell_type for cell_type in gmx_header if not cell_type in all_types])
 
 print("\n", "#"*20, "\n", "Final config file:", "\n", "#"*20, "\n")
 config_outfile = open(opt.outfile, "w")
@@ -56,7 +63,7 @@ for cell_type in matched_types:
         subtypes = [subtype for subtype in config_dictionary[cell_type] if subtype in matched_types]
         if not len(subtypes):
             subtypes = ["none"]
-        outfile_line = cell_type + "\t" + ", ".join(subtypes)
+        outfile_line = cell_type + "\t" + ",".join(subtypes)
         config_outfile.write(outfile_line + "\n")
         print(outfile_line)
 
