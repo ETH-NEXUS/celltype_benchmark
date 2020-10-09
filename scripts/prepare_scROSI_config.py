@@ -1,17 +1,15 @@
 ############### prepare_scROSI_config.py ###############
-"""
-Author: Marcus Lindberg
-Date: 05/10/2020
-
-Requirements: Python 3.7.4
-
-A simple script for filtering celltype_config files based on cell types present in a GMX marker file.
-As input for scROSI, it is critical that the celltype_config file does not contain cell types not present in the GMX file.
-The final config file is saved as a tsv file.
-
-Example usage:
-python prepare_scROSI_config.py --gmx {marker_file.gmx} --config_groundtruth {config_file.tsv} --outfile {modified_config_file.tsv}
-"""
+# Author: Marcus Lindberg
+# Date: 05/10/2020
+#
+# Requirements: Python 3.7.4
+#
+# A simple script for filtering celltype_config files based on cell types present in a GMX marker file.
+# As input for scROSI, it is critical that the celltype_config file does not contain cell types not present in the GMX file.
+# The final config file is saved as a tsv file.
+#
+# Example usage:
+# python prepare_scROSI_config.py --gmx {marker_file.gmx} --config_groundtruth {config_file.tsv} --outfile {modified_config_file.tsv}
 
 import argparse
 

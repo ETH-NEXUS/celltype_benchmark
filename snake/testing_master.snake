@@ -42,7 +42,9 @@ localrules: all
 rule all:
 	input:
 		expand(CELLTYPING_OUT + '{sample}/{method}/predicted_labels.{model}.csv', sample = get_sample_names(), method = SELECTED_METHODS, model = TRAINED_MODELS),
-                expand(CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.csv', sample = get_sample_names())
+                expand(CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.csv', sample = get_sample_names()),
+                expand(CELLTYPING_OUT + "{sample}/{method}/{sample}.{model}.f1-score_{method}.csv", sample = get_sample_names(), method = SELECTED_METHODS, model = TRAINED_MODELS)
+                #expand(CELLTYPING_OUT + "{sample}/{method}/{sample}.f1-score_{method}.csv", sample = get_sample_names(), method = SELECTED_METHODS)
 	output:
 		OUTDIR + "complete_testing.txt"
 	params:

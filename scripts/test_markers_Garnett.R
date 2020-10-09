@@ -1,28 +1,41 @@
 ###########################
 ###########################
 # Test defined marker usefuleness using Garnett
-library(org.Hs.eg.db)
+library(optparse)
+library(monocle3)
 library(garnett)
+library(org.Hs.eg.db)
 
-data_path <- "/cluster/project/nexus/benchmarking/celltyping/test_pilot/cellranger_run/zheng_sorted_merged/"
+option_list = list(
+  make_option("--cds", type = "character", help = "Path to RDS file with CDS data object."),
+  make_option("--marker_file", type = "character", help = "Path to marker file to be evaluated.")
+)
 
-pbmc_cds <- load_cellranger_data(data_path)
+opt_parser = OptionParser(option_list = option_list)
+opt = parse_args(opt_parser)
 
+#data_path <- "/cluster/project/nexus/benchmarking/celltyping/test_pilot/cellranger_run/zheng_sorted_merged/"
+
+#cds <- load_cellranger_data(data_path)
+print("Loading cell data set...")
+cds <- readRDS(opt$cds)
+print(class(cds))
 # Basic pre-processing that NEEDS to be done
-process_cds_monocle <- function(cds){
-  cds <- preprocess_cds(cds, num_dim = 100) #PCA by default
-  cds <- reduce_dimension(cds) #UMAP by default
-  return(cds)
-}
+#process_cds_monocle <- function(cds){
+#  cds <- preprocess_cds(cds, num_dim = 100) #PCA by default
+#  cds <- reduce_dimension(cds) #UMAP by default
+#  return(cds)
+#}
 
-pbmc_cds <- process_cds_monocle(pbmc_cds)
+#cds <- process_cds_monocle(cds)
 
-marker_file_path <- c(
-  "/cluster/project/nexus/benchmarking/celltyping/garnett_files/marker_files/hsPBMC_markers.txt", 
-  "/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_Garnett_markers.txt"
-  )
-
-marker_check <- check_markers(cds = pbmc_cds, marker_file = marker_file_path[2], 
+#marker_file_path <- c(
+#  "/cluster/project/nexus/benchmarking/celltyping/garnett_files/marker_files/hsPBMC_markers.txt", 
+#  "/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_Garnett_markers.txt"
+#  )
+marker_file_path <- opt$marker_file
+print("Starting marker check...")
+marker_check <- check_markers(cds = cds, marker_file = marker_file_path, 
                               db = org.Hs.eg.db, classifier_gene_id_type = "SYMBOL",
                               cds_gene_id_type = "ENSEMBL")
 #plot_markers(marker_check)
@@ -35,12 +48,17 @@ median(as.matrix(na.omit(marker_check$marker_score)))
 high_markers <- ok_markers[ok_markers$marker_score > median(as.matrix(na.omit(marker_check$marker_score))),]
 top_markers <- ok_markers[ok_markers$marker_score > 1,]
 
-marker_check_zheng <- check_markers(cds = pbmc_cds, 
-                                    marker_file = "/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_Garnett_markers_Zheng.txt", 
-                              db = org.Hs.eg.db, classifier_gene_id_type = "SYMBOL",
-                              cds_gene_id_type = "ENSEMBL")
+#marker_check_zheng <- check_markers(cds = cds, 
+#                                    marker_file = "/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_Garnett_markers_Zheng.txt", 
+#                              db = org.Hs.eg.db, classifier_gene_id_type = "SYMBOL",
+#                              cds_gene_id_type = "ENSEMBL")
 
-plot_markers(marker_check_zheng[marker_check_zheng$summary=="Ok",])
+#plot_markers(marker_check[marker_check$summary=="Ok",])
+print(ok_markers)
+print(top_markers)
+print(head(marker_check))
+print(tail(marker_check))
+write.table(marker_check, "marker_check.txt")
 ####################TESTING##############################
 plot_markers_DEBUG <- function (marker_check_df, amb_marker_cutoff = 0.5, label_size = 2) 
 {

@@ -266,7 +266,6 @@ rule garnett_train_all:
                 barcodes = METHOD_TRAIN_IN + '{sample}.index_All.RDS',
                 marker_file = MARKER_GENES_OUT + '{sample}.garnett.tsv'
         output:
-                pred_labels = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_predicted_labels.csv',
                 model_out = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_model.RDS'
         params:
                 lsfoutfile = METHOD_ALL_TRAIN_OUT + '{sample}.garnett_train_all.lsfout.log',

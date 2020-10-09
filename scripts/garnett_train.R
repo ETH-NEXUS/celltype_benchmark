@@ -31,6 +31,9 @@ marker_gene_format <- ifelse(substr(example_gene_in_marker_file, start = 1, stop
 example_gene_in_cds <- rownames(cds)[1]
 cds_gene_format <- ifelse(substr(example_gene_in_cds, start = 1, stop = 4) == "ENSG", "ENSEMBL", "SYMBOL")
 
+print(paste("Gene name format in marker file:", marker_gene_format))
+print(paste("Gene name format in CDS data:", cds_gene_format))
+
 ######### Garnett run ##########    
 print("Starting training...")
 start_train <- Sys.time()
@@ -56,12 +59,13 @@ if(length(barcodes_selected$test_data) > 0){
                                       garnett_classifier,
                                       db = org.Hs.eg.db,
                                       cluster_extend = TRUE,
-                                      cds_gene_id_type = "ENSEMBL")
+                                      cds_gene_id_type = cds_gene_format)
 
     end_test <- Sys.time()
     test_time <- as.numeric(end_test - start_test)
     print("Prediction complete.")
     print("Saving predicted labels...")
+    print(paste0(opt$output_dir, opt$sample_name, '.garnett_predicted_labels.csv'))
     pred_labels <- list(pData(garnett_test)$cluster_ext_type)
     names(pred_labels) <- "x"
     write.csv(pred_labels,paste0(opt$output_dir, opt$sample_name, '.garnett_predicted_labels.csv'),row.names = FALSE,quote=FALSE)
@@ -70,10 +74,11 @@ if(length(barcodes_selected$test_data) > 0){
 }
 
 print("Saving classifier model...")
+print(paste0(opt$output_dir, opt$sample_name, ".garnett_model.RDS"))
 saveRDS(garnett_classifier, paste0(opt$output_dir, opt$sample_name, ".garnett_model.RDS"))
 print("Model saved.")
 
-#debug_markers  <- train_cell_classifier(cds = cds[,barcodes_selected$train_data],
+debug_markers  <- train_cell_classifier(cds = cds[,barcodes_selected$train_data],
                                            marker_file = opt$marker_file,
                                            db=org.Hs.eg.db,
                                            cds_gene_id_type = cds_gene_format,
@@ -84,4 +89,4 @@ print("Model saved.")
                                            marker_file_gene_id_type = marker_gene_format,
                                            cores = 1, return_initial_assign = TRUE)
 
-#print(debug_markers)
+print(debug_markers)
