@@ -11,8 +11,8 @@ library(SingleCellExperiment)
 #Data Path
 #opt = list(
 #  outputDirec = "/Users/bolars/Documents/celltyping/MarkerGeneList/",
-#  SCE = "/Users/bolars/Documents/celltyping/MarkerGeneList/2020-Mar-Census-Newborn-Blood-10x.scp_ground-truth.genes_cells_filtered.corrected.RDS",
-#  sampleName = "Newborn",
+#  SCE = "/Users/bolars/Documents/celltyping/MarkerGeneList/Zheng_merged_annotated.RDS",
+#  sampleName = "Zheng",
 #  config = "/Users/bolars/Documents/celltyping/MarkerGeneList/celltype_config_PBMC.txt",
 #  format = c("gmx","garnett"),
 #  foldChange = c(2,1.5),
@@ -40,9 +40,13 @@ opt = parse_args(opt_parser)
 ################################################################################
 ## load input data
 sce_data <- readRDS(opt$SCE)
-rownames(sce_data) <- rowData(sce_data)$SYMBOL #hotfix for HGNC symbols
-lab_maj <- factor(sce_data@metadata$ground_truth_major)
-lab_sub <- factor(sce_data@metadata$ground_truth_minor)
+#rownames(sce_data) <- rowData(sce_data)$SYMBOL #hotfix for HGNC symbols
+lab_maj <- sce_data@metadata$ground_truth_major
+lab_sub <- sce_data@metadata$ground_truth_minor
+
+lab_sub[lab_sub=="none"] <- lab_maj[lab_sub=="none"]
+lab_maj <- factor(lab_maj)
+lab_sub <- factor(lab_sub)
 
 #read config file
 #################

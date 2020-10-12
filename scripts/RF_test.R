@@ -10,9 +10,9 @@ library(cowplot)
 library(SingleCellExperiment)
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  rf_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.RF_model.RDS",
+#  SCE = "/Users/bolars/Documents/celltyping/test_run/Zheng_merged_annotated.RDS",
+#  outputDirec = "/Users/bolars/Documents/celltyping/test_run/pred_rf.txt",
+#  rf_model = "/Users/bolars/Documents/celltyping/test_run/All.RF_model.RDS",
 #  sampleName = "RF_test",
 #  method = "RF"
 #)
@@ -48,7 +48,13 @@ rownames(dat) <- colnames(sce_data)
 colnames(dat) <- gsub("-","_",colnames(dat))
 xlevel = names(rf_model$forest$ncat)
 dat_filter <- dat[,colnames(dat) %in% xlevel]
-data_rf <- cbind(droplevels(lab_data),dat_filter[,which(apply(dat_filter,2,sum) != 0)])
+missgene <- xlevel[!(xlevel %in% colnames(dat))]
+if (!is_empty(missgene)){
+  tmp <- matrix(0,nrow = nrow(dat_filter),ncol = length(missgene))
+  colnames(tmp) <- missgene
+  dat_filter <- cbind(dat_filter,tmp)
+}
+data_rf <- cbind(droplevels(lab_data),dat_filter)
 
 # Random Forest prediction
 pred.rf <- predict(rf_model,newdata = data_rf[,-1])
