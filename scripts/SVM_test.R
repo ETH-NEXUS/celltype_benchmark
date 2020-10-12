@@ -10,9 +10,9 @@ library(cowplot)
 library(SingleCellExperiment)
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  svm_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.SVM_model.RDS",
+#  SCE = "/Users/bolars/Documents/celltyping/test_run/Zheng_merged_annotated.RDS",
+#  outputDirec = "/Users/bolars/Documents/celltyping/test_run/pred_svm.txt",
+#  svm_model = "/Users/bolars/Documents/celltyping/test_run/All.SVM_model.RDS",
 #  sampleName = "SVM_test",
 #  method = "SVM"
 #)
@@ -47,7 +47,13 @@ rownames(dat) <- colnames(sce_data)
 colnames(dat) <- gsub("-","_",colnames(dat))
 xlevel = attr(svm_model$terms,"term.labels")
 dat_filter <- dat[,colnames(dat) %in% xlevel]
-data_svm <- cbind(droplevels(lab_data),dat_filter[,which(apply(dat_filter,2,sum) != 0)])
+missgene <- xlevel[!(xlevel %in% colnames(dat))]
+if (!is_empty(missgene)){
+  tmp <- matrix(0,nrow = nrow(dat_filter),ncol = length(missgene))
+  colnames(tmp) <- missgene
+  dat_filter <- cbind(dat_filter,tmp)
+}
+data_svm <- cbind(droplevels(lab_data),dat_filter)
 
 # SVM prediction
 pred.svm <- predict(svm_model,newdata = data_svm[,-1],probability = T)
