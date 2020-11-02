@@ -10,9 +10,9 @@ library(cowplot)
 library(SingleCellExperiment)
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/test_run/Zheng_merged_annotated.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/test_run/pred_svm.txt",
-#  svm_model = "/Users/bolars/Documents/celltyping/test_run/All.SVM_model.RDS",
+#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
+#  outputFile = "/Users/bolars/Documents/celltyping/benchmark_scripts/pred_svm.txt",
+#  svm_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.SVM_model.RDS",
 #  sampleName = "SVM_test",
 #  method = "SVM"
 #)
@@ -37,7 +37,9 @@ opt = parse_args(opt_parser)
 ################################################################################
 ## load input data
 sce_data = readRDS(opt$SCE)
-lab_data = sce_data@metadata$ground_truth_major
+lab_maj <- sce_data@metadata$ground_truth_major
+lab_data <- sce_data@metadata$ground_truth_minor
+lab_data[lab_data=="none"] <- lab_maj[lab_data=="none"]
 svm_model = readRDS(opt$svm_model)
 
 #data frame
@@ -54,11 +56,12 @@ if (!is_empty(missgene)){
   dat_filter <- cbind(dat_filter,tmp)
 }
 data_svm <- cbind(droplevels(lab_data),dat_filter)
+data_svm$label <- as.factor(data_svm$label)
 
 # SVM prediction
 pred.svm <- predict(svm_model,newdata = data_svm[,-1],probability = T)
 prob.svm <- attr(pred.svm,"probabilities")
-idx.unk <- apply(prob.svm,1,max)<0.7
+idx.unk <- apply(prob.svm,1,max)<0.5
 pred.svm <- as.character(pred.svm)
 pred.svm[idx.unk] <- "unknown"
 ################################################################################

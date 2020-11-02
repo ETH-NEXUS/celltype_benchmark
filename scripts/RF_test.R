@@ -10,9 +10,9 @@ library(cowplot)
 library(SingleCellExperiment)
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/test_run/Zheng_merged_annotated.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/test_run/pred_rf.txt",
-#  rf_model = "/Users/bolars/Documents/celltyping/test_run/All.RF_model.RDS",
+#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
+#  outputFile = "/Users/bolars/Documents/celltyping/benchmark_scripts/pred_rf.txt",
+#  rf_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.RF_model.RDS",
 #  sampleName = "RF_test",
 #  method = "RF"
 #)
@@ -38,7 +38,9 @@ opt = parse_args(opt_parser)
 ################################################################################
 ## load input data
 sce_data = readRDS(opt$SCE)
-lab_data = sce_data@metadata$ground_truth_major
+lab_maj <- sce_data@metadata$ground_truth_major
+lab_data <- sce_data@metadata$ground_truth_minor
+lab_data[lab_data=="none"] <- lab_maj[lab_data=="none"]
 rf_model = readRDS(opt$rf_model)
 
 #data frame
@@ -55,11 +57,12 @@ if (!is_empty(missgene)){
   dat_filter <- cbind(dat_filter,tmp)
 }
 data_rf <- cbind(droplevels(lab_data),dat_filter)
+data_rf$label <- as.factor(data_rf$label)
 
 # Random Forest prediction
 pred.rf <- predict(rf_model,newdata = data_rf[,-1])
 prob.rf <- predict(rf_model,newdata = data_rf[,-1],type = "prob")
-idx.unk <- apply(prob.rf,1,max)<0.7
+idx.unk <- apply(prob.rf,1,max)<0.5
 pred.rf <- as.character(pred.rf)
 pred.rf[idx.unk] <- "unknown"
 

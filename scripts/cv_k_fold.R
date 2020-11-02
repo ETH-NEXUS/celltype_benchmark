@@ -11,8 +11,8 @@ library(caret)
 #Data Path
 #opt = list(
 #  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-#  kfold = 10
+#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
+#  kfold = 5
 #)
 
 # command line arguments are parsed
@@ -31,7 +31,9 @@ opt = parse_args(opt_parser)
 ################################################################################
 ## load input data
 sce_data <- readRDS(opt$SCE)
-lab_data <- sce_data@metadata$ground_truth_major
+lab_maj <- sce_data@metadata$ground_truth_major
+lab_data <- sce_data@metadata$ground_truth_minor
+lab_data[lab_data=="none"] <- lab_maj[lab_data=="none"]
 barcode <- colnames(sce_data)
 
 # cross validation

@@ -11,10 +11,10 @@ library(caret)
 library(SingleCellExperiment)
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
+#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
 #  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold_01.RDS",
-#  sampleName = "Fold_01",
+#  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold_1.RDS",
+#  sampleName = "Fold_1",
 #  method = "SVM"
 #)
 # command line arguments are parsed
@@ -37,7 +37,9 @@ opt = parse_args(opt_parser)
 ################################################################################
 ## load input data
 sce_data = readRDS(opt$SCE)
-lab_data = sce_data@metadata$ground_truth_major
+lab_maj <- sce_data@metadata$ground_truth_major
+lab_data <- sce_data@metadata$ground_truth_minor
+lab_data[lab_data=="none"] <- lab_maj[lab_data=="none"]
 cvindex = readRDS(opt$CVindex)
 
 #data frame
@@ -46,6 +48,7 @@ dat <- as.data.frame(t(normcounts(sce_data)))
 rownames(dat) <- colnames(sce_data)
 colnames(dat) <- gsub("-","_",colnames(dat))
 data_svm <- cbind(droplevels(lab_data),dat[,which(apply(dat,2,sum) != 0)])
+data_svm$label <- as.factor(data_svm$label)
 
 #cross validation
 training_fold = data_svm[rownames(data_svm) %in% cvindex$train_data, ]
