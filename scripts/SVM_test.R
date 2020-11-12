@@ -64,9 +64,10 @@ prob.svm <- attr(pred.svm,"probabilities")
 idx.unk <- apply(prob.svm,1,max)<0.5
 pred.svm <- as.character(pred.svm)
 pred.svm[idx.unk] <- "unknown"
+pred.svm <- data.frame(celltype_final=pred.svm)
 ################################################################################
 ## save predicted labels
-write.csv(pred.svm,opt$outputFile)
+write_csv(pred.svm,opt$outputFile)
 #write.csv(pred.svm,path %&% "." %&%
 #            opt$method %&% "_predicted_test_labels.csv")
 #confusionMatrix(data_svm[,1],factor(pred.rf,levels=levels(data_svm[,1])))

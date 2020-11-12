@@ -65,10 +65,11 @@ prob.rf <- predict(rf_model,newdata = data_rf[,-1],type = "prob")
 idx.unk <- apply(prob.rf,1,max)<0.5
 pred.rf <- as.character(pred.rf)
 pred.rf[idx.unk] <- "unknown"
+pred.rf <- data.frame(celltype_final=pred.rf)
 
 ################################################################################
 ## save predicted labels
-write.csv(pred.rf,opt$outputFile)
+write_csv(pred.rf,opt$outputFile)
 #write.csv(pred.rf,path %&% "." %&%
 #            opt$method %&% "_predicted_test_labels.csv")
 #confusionMatrix(data_rf[,1],factor(pred.rf,levels=levels(data_rf[,1])))
