@@ -8,11 +8,12 @@ library(tidyverse)
 library(e1071)
 library(cowplot)
 library(SingleCellExperiment)
+
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
-#  outputFile = "/Users/bolars/Documents/celltyping/benchmark_scripts/pred_svm.txt",
-#  svm_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.SVM_model.RDS",
+#  SCE = "/Users/bolars/Documents/celltyping/output/Zheng_320nodg_test.RDS",
+#  outputFile = "/Users/bolars/Documents/celltyping/output/training/pred_svm_zheng.txt",
+#  svm_model = "/Users/bolars/Documents/celltyping/output/training/All.SVM_model.RDS",
 #  sampleName = "SVM_test",
 #  method = "SVM"
 #)
@@ -61,7 +62,7 @@ data_svm$label <- as.factor(data_svm$label)
 # SVM prediction
 pred.svm <- predict(svm_model,newdata = data_svm[,-1],probability = T)
 prob.svm <- attr(pred.svm,"probabilities")
-idx.unk <- apply(prob.svm,1,max)<0.5
+idx.unk <- apply(prob.svm,1,max)<0.3
 pred.svm <- as.character(pred.svm)
 pred.svm[idx.unk] <- "unknown"
 pred.svm <- data.frame(celltype_final=pred.svm)

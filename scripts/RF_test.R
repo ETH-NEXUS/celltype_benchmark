@@ -10,9 +10,9 @@ library(cowplot)
 library(SingleCellExperiment)
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
-#  outputFile = "/Users/bolars/Documents/celltyping/benchmark_scripts/pred_rf.txt",
-#  rf_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.RF_model.RDS",
+#  SCE = "/Users/bolars/Documents/celltyping/output/Newborn_PBMC_subset_test.RDS",
+#  outputFile = "/Users/bolars/Documents/celltyping/output/training/pred_rf_newb_2.txt",
+#  rf_model = "/Users/bolars/Documents/celltyping/output/training/All.RF_model_2.RDS",
 #  sampleName = "RF_test",
 #  method = "RF"
 #)
@@ -62,7 +62,7 @@ data_rf$label <- as.factor(data_rf$label)
 # Random Forest prediction
 pred.rf <- predict(rf_model,newdata = data_rf[,-1])
 prob.rf <- predict(rf_model,newdata = data_rf[,-1],type = "prob")
-idx.unk <- apply(prob.rf,1,max)<0.5
+idx.unk <- apply(prob.rf,1,max)<0.3
 pred.rf <- as.character(pred.rf)
 pred.rf[idx.unk] <- "unknown"
 pred.rf <- data.frame(celltype_final=pred.rf)

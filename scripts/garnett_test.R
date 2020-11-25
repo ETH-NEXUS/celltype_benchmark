@@ -43,8 +43,9 @@ pred_labels <- list(pData(cds)$cluster_ext_type)
 
 print("Writing predicted labels...")
 #write.csv(true_labels,paste0(opt$output_dir,'/Garnett_CV_true.csv'),row.names = FALSE)
-write.csv(pred_labels,opt$outputFile,row.names = FALSE)
-
+#write.csv(pred_labels,opt$outputFile,row.names = FALSE)
+library(tidyverse)
+write_csv(data.frame(celltype_final=pred_labels[[1]]),opt$outputFile)
 #write.csv(pred_labels,paste0(opt$output_dir, opt$sample_name, '.garnett_CV_pred.csv'),row.names = FALSE)
 #write.csv(test_time,paste0(opt$output_dir, opt$sample_name, '.garnett_CV_test_time.csv'),row.names = FALSE)
 print("Done!")

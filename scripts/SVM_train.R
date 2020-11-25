@@ -9,12 +9,13 @@ library(e1071)
 library(cowplot)
 library(caret)
 library(SingleCellExperiment)
+
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold_1.RDS",
-#  sampleName = "Fold_1",
+#  SCE = "/Users/bolars/Documents/celltyping/output/Adult_PBMC_subset_test.RDS",
+#  outputDirec = "/Users/bolars/Documents/celltyping/output/training/",
+#  CVindex = "/Users/bolars/Documents/celltyping//output/training/Adult_PBMC_subset.index_All.RDS",
+#  sampleName = "All",
 #  method = "SVM"
 #)
 # command line arguments are parsed
@@ -60,6 +61,7 @@ classifier <- svm(label ~ .,
                  method = "C-classification",
                  kernel = "linear",
                  probability=T)
+
 if (!is_empty(cvindex$test_data)){
   y_pred = predict(classifier, newdata = test_fold[,-1])
   #y_pred <- factor(y_pred,levels = lev)

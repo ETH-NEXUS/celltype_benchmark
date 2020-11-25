@@ -12,10 +12,10 @@ library(SingleCellExperiment)
 
 #Data Path
 #opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold_1.RDS",
-#  sampleName = "Fold_1",
+#  SCE = "/Users/bolars/Documents/celltyping/output/Adult_PBMC_subset_test.RDS",
+#  outputDirec = "/Users/bolars/Documents/celltyping/output/training/",
+#  CVindex = "/Users/bolars/Documents/celltyping//output/training/Adult_PBMC_subset.index_All.RDS",
+#  sampleName = "All",
 #  method = "RF"
 #)
 # command line arguments are parsed
@@ -57,9 +57,10 @@ training_fold = data_rf[rownames(data_rf) %in% cvindex$train_data, ]
 test_fold = data_rf[rownames(data_rf) %in% cvindex$test_data, ]
 
 #random forest
-classifier <- randomForest(label~.,
-                           data=training_fold,
-                           ntree=Ntrees)
+classifier <- randomForest(x=training_fold[,which(colnames(training_fold)!="label")],
+                           y=training_fold[,which(colnames(training_fold)=="label")],
+                           ntree=Ntrees,
+                           strata = training_fold[,which(colnames(training_fold)=="label")])
 if (!is_empty(cvindex$test_data)){
   y_pred = predict(classifier, newdata = test_fold[,-1])
   #y_pred <- factor(y_pred,levels = lev)
