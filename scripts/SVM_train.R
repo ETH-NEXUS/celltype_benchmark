@@ -14,7 +14,7 @@ library(SingleCellExperiment)
 #opt = list(
 #  SCE = "/Users/bolars/Documents/celltyping/output/Adult_PBMC_subset_test.RDS",
 #  outputDirec = "/Users/bolars/Documents/celltyping/output/training/",
-#  CVindex = "/Users/bolars/Documents/celltyping//output/training/Adult_PBMC_subset.index_All.RDS",
+#  CVindex = "/Users/bolars/Documents/celltyping/output/training/Adult_PBMC_subset.index_All.RDS",
 #  sampleName = "All",
 #  method = "SVM"
 #)
@@ -48,7 +48,10 @@ lab_data <- data.frame(label=lab_data)
 dat <- as.data.frame(t(normcounts(sce_data)))
 rownames(dat) <- colnames(sce_data)
 colnames(dat) <- gsub("-","_",colnames(dat))
-data_svm <- cbind(droplevels(lab_data),dat[,which(apply(dat,2,sum) != 0)])
+#remove zero- and near zero-variance predictors
+procDat <- preProcess(dat,method = "nzv")
+dat <- predict(procDat,dat)
+data_svm <- cbind(droplevels(lab_data),dat)
 data_svm$label <- as.factor(data_svm$label)
 
 #cross validation
