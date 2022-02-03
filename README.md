@@ -1,5 +1,5 @@
 # Cell typing_benchmark
-Snakemake-based (M\"ö"lder et. al 2021)  pipeline to run individual cell typing methods and compare the accuracies of each method in a PBMC-based benchmark.
+Snakemake-based (Mölder et. al 2021)  pipeline to run individual cell typing methods and compare the accuracies of each method in a PBMC-based benchmark.
 
 ## Requirements:
 `Conda` environments will be used to install some of the cell typing methods.
@@ -58,7 +58,6 @@ To indicate the data sets that should be processed in the benchmark, a sample ma
 ```
 1       sample_name_1     N       1
 1       sample_name_2     N       1
-
 ```
 Here, [sample_name] needs to be substituted with the name of the data sets that should be processed. Each data set should be indicated in a new line.
 
@@ -84,21 +83,17 @@ Example testing run (assuming lsf system on cluster, replace with the according 
 
 
 ## Input data:
-Required input data:
+Required input data for each data set that shall be included in the benchmark:
 
-- RDS file containing a SCE (SingleCellExperiment) object with pre-processed counts data & per-cell major and minor cell type (ground-truth) labels.
+- RDS file containing a SCE (SingleCellExperiment) object including per-cell major and minor cell type (ground-truth) labels.
 
-**If this is your first time running the cell type benchmark, it is unlikely that your counts data object will be annotated with correctly formatted cell type labels.**
-
-See the "Data" section near the end of the Readme for examples of entire workflows in preparing data (such as the example data used) for use in the benchmark.
-
-If your data is already processed, please follow the steps below to first prepare your data:
-
+Please refer to the paragraph below for information on adding ground-truth labels to your data set. Apart from this the benchmark pipeline works on standard SCE data. Note that the default cell typing methods currently implemented in the pipeline expect normalized counts.
+  
 ### Generating a SCE counts object with ground-truth cell type labels
 
 Required input data:
 
-- RDS file containing a SCE (SingleCellExperiment) object with pre-processed counts data
+- RDS file containing a SCE (SingleCellExperiment) object
 - A *tsv* (tab-separated values) file containing a column with barcodes and a column with cell type ground-truth labels
 
 The ground-truth *tsv* file should be formatted as follows:
@@ -177,6 +172,4 @@ Once the final ground-truth file has been generated, use the `add_sce_groundtrut
 
 **Usage:** `Rscript add_sce_groundtruth.R --sce_in processed_sce.RDS --labels_in ground_truth.tsv --matched_labels --sce_out final_annotated_sce.RDS ` 
 
-This output of this is the complete file to be used as input for the benchmark pipelines.
-
-
+This output of this is the complete file to be used as input for the benchmark pipeline.

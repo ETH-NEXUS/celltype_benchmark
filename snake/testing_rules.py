@@ -89,52 +89,52 @@ rule garnett_test:
         shell:
                 config['methods']['garnett']['test']['call'] + ' --cds {input.cds_in} --classifier {input.model} --outputFile {output.pred_labels}'
 
-if not 'SCROSI_IN' in globals():
-    SCROSI_IN = OUTDIR + "marker_genes/"
+if not 'SCROSHI_IN' in globals():
+    SCROSHI_IN = OUTDIR + "marker_genes/"
 
-# prep config file based on present cell types, for scROSI
-rule prepare_scROSI_config_file:
+# prep config file based on present cell types, for scROSHI
+rule prepare_scROSHI_config_file:
         input:
-                celltype_gmx = SCROSI_IN + '{sample}.gmx'
+                celltype_gmx = SCROSHI_IN + '{sample}.gmx'
         output:
-                celltype_config = SCROSI_IN + '{sample}.celltype_config.tsv'
+                celltype_config = SCROSHI_IN + '{sample}.celltype_config.tsv'
         params:
-                lsfoutfile = SCROSI_IN + '{sample}.prep_celltype_config.lsfout.log',
-                lsferrfile = SCROSI_IN + '{sample}.prep_celltype_config.lsferr.log',
-                scratch = config['methods']['prep_scROSI_config']['scratch'],
-                mem = config['methods']['prep_scROSI_config']['mem'],
-                time = config['methods']['prep_scROSI_config']['time'],
+                lsfoutfile = SCROSHI_IN + '{sample}.prep_celltype_config.lsfout.log',
+                lsferrfile = SCROSHI_IN + '{sample}.prep_celltype_config.lsferr.log',
+                scratch = config['methods']['prep_scROSHI_config']['scratch'],
+                mem = config['methods']['prep_scROSHI_config']['mem'],
+                time = config['methods']['prep_scROSHI_config']['time'],
                 celltype_config_gt = config['resources']['celltype_config_gt']
         #threads:
-        #        config['methods']['prep_scROSI_config']['threads']
+        #        config['methods']['prep_scROSHI_config']['threads']
         benchmark:
-                SCROSI_IN + '{sample}.prep_celltype_config.benchmark'
+                SCROSHI_IN + '{sample}.prep_celltype_config.benchmark'
         shell:
-                config['methods']['prep_scROSI_config']['call'] + ' --gmx {input.celltype_gmx} --config_groundtruth {params.celltype_config_gt} --outfile {output.celltype_config}'
+                config['methods']['prep_scROSHI_config']['call'] + ' --gmx {input.celltype_gmx} --config_groundtruth {params.celltype_config_gt} --outfile {output.celltype_config}'
 
-# scROSI, testing
-rule scROSI:
+# scROSHI, testing
+rule scROSHI:
         input:
                 sce =  INPUTDIR + '{sample}.RDS', 
-                celltype_gmx = SCROSI_IN + '{sample}.gmx',
-		celltype_config = SCROSI_IN + '{sample}.celltype_config.tsv'
+                celltype_gmx = SCROSHI_IN + '{sample}.gmx',
+		celltype_config = SCROSHI_IN + '{sample}.celltype_config.tsv'
         output:
-                pred_labels = CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.csv'
+                pred_labels = CELLTYPING_OUT + '{sample}/scROSHI/predicted_labels.csv'
         params:
-                lsfoutfile = CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.lsfout.log',
-                lsferrfile = CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.lsferr.log',
-                scratch = config['methods']['scROSI']['scratch'],
-                mem = config['methods']['scROSI']['mem'],
-                time = config['methods']['scROSI']['time'],
-                params = config['methods']['scROSI']['params'],
+                lsfoutfile = CELLTYPING_OUT + '{sample}/scROSHI/predicted_labels.lsfout.log',
+                lsferrfile = CELLTYPING_OUT + '{sample}/scROSHI/predicted_labels.lsferr.log',
+                scratch = config['methods']['scROSHI']['scratch'],
+                mem = config['methods']['scROSHI']['mem'],
+                time = config['methods']['scROSHI']['time'],
+                params = config['methods']['scROSHI']['params'],
 		outputDirec = CELLTYPING_OUT,
 		sampleName = '{sample}'
         threads:
-                config['methods']['scROSI']['threads']
+                config['methods']['scROSHI']['threads']
         benchmark:
-                CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.benchmark'
+                CELLTYPING_OUT + '{sample}/scROSHI/predicted_labels.benchmark'
         shell:
-                config['methods']['scROSI']['call'] + ' --SCE {input.sce} --celltype_lists {input.celltype_gmx} --celltype_config {input.celltype_config} --outputDirec {params.outputDirec}{params.sampleName}/scROSI/ --sampleName {params.sampleName}'
+                config['methods']['scROSHI']['call'] + ' --SCE {input.sce} --celltype_lists {input.celltype_gmx} --celltype_config {input.celltype_config} --outputDirec {params.outputDirec}{params.sampleName}/scROSHI/ --sampleName {params.sampleName}'
 
 """
 TRAINED_MODELS = config['resources']['trained_models']
