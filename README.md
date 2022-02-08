@@ -100,12 +100,12 @@ The ground-truth *tsv* file should be formatted as follows:
 
 - 4 columns:
   1. Barcodes (in data)
-  2. Cell types
-  3. Standardised major cell types
-  4. Standardised minor cell types
+  2. Original Cell type label
+  3. Standardised major cell type label
+  4. Standardised minor cell type label
 
 ```
-Barcode	Original_type	Coerced_major_type	Coerced_minor_type
+Barcode	Original_type	Major_type	Minor_type
 0000e539a7dfe057f8013c9f5081b369	naive B cell	B.cells	B.cells.naive
 0002078f929f37ffa735bd59379e35f7	T-helper cell	T.cells	T.cells.CD4
 00032d6cd1f7c21a3ac0ffb1b0233a61	precursor B cell	B.cells	B.cells.precursor
@@ -118,10 +118,7 @@ Barcode	Original_type	Coerced_major_type	Coerced_minor_type
 ```
 
 *Note: While the labels in the header are unimportant, a header is necessary.*
-
-The standardised cell type column should consist of common, mutual labels that can be used to compare results between different samples. For single-sample analyses, the same number of columns are required, but they can be arbitrary as they need not match another sample's labels.
-
-
+*Note: If no sub types are available, specify "none" in the column "Minor_type".*
 
 The process of generating the list above can be automated using the `generate_ground-truth_list.py` Python script.
 
@@ -138,6 +135,7 @@ Example of `--original_labels` input file:
 ```
 
 Example of `--label_dictionary` input file:
+- A 2-column tsv file with the original cell type labels and standardized cell type labels (can be the same label as the original cell type).
 
 ```
 Dictionary_original     Dictionary_matched
@@ -148,11 +146,10 @@ CD16+ monocyte  Monocytes
 cd4_t_helper_fastqs     T.cells.CD4
 ```
 
-- A 2-column tsv file with the original cell type labels and standardized cell type labels. Like stated above, if this is not necessary, the columns can be identical.
 
 Example of `--subtype_dictionary` input file:
 
-- A file mapping the relationship between major cell types and minor subtypes.
+- A table with two columns and a header, mapping the relationship between major cell types and minor subtypes (subtypes can be "none" if no subtypes are present).
 
 An example can be found in `marker_files/PBMC/celltype_config_PBMC.txt`. 
 
@@ -160,12 +157,6 @@ An example can be found in `marker_files/PBMC/celltype_config_PBMC.txt`.
 Major_type      Subtypes
 Monocytes       none
 T.cells T.cells.CD4,T.cells.CD8,T.cells.regulatory
-Dendritic.cells none
-B.cells B.cells.memory,B.cells.naive,B.cells.precursor
-Plasma.cells    none
-Plasmacytoid.dendritic.cells    none
-NK.cells        none
-Stem.cells      none
 ```
 
 Once the final ground-truth file has been generated, use the `add_sce_groundtruth.R` script to annotate the SCE data file with the ground-truth labels.
