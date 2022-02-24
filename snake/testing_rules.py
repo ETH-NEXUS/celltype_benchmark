@@ -136,35 +136,6 @@ rule scROSHI:
         shell:
                 config['methods']['scROSHI']['call'] + ' --SCE {input.sce} --celltype_lists {input.celltype_gmx} --celltype_config {input.celltype_config} --outputDirec {params.outputDirec}{params.sampleName}/scROSHI/ --sampleName {params.sampleName}'
 
-"""
-TRAINED_MODELS = config['resources']['trained_models']
-# evaluate models & calculate accuracy statistics (F1-score)
-rule evaluate_classifier:
-        input:
-                sce_in = INPUTDIR + "{sample}.RDS",
-                predicted_labels = expand(CELLTYPING_OUT + "{{sample}}/{{method}}/predicted_labels.{model}.csv", model = TRAINED_MODELS)
-        output:
-                CELLTYPING_OUT + '{sample}/{method}/{sample}.confusion_{method}.csv',
-                CELLTYPING_OUT + '{sample}/{method}/{sample}.f1-score_{method}.csv',
-                CELLTYPING_OUT + '{sample}/{method}/{sample}.population-size_{method}.csv',
-                CELLTYPING_OUT + '{sample}/{method}/{sample}.summary_{method}.csv'
-        params:
-                lsfoutfile = CELLTYPING_OUT + '{sample}/{method}/{sample}.cv_summary.lsfout.log',
-                lsferrfile = CELLTYPING_OUT + '{sample}/{method}/{sample}.cv_summary.lsferr.log',
-                scratch = config['statistics']['cv_summary']['scratch'],
-                mem = config['statistics']['cv_summary']['mem'],
-                time = config['statistics']['cv_summary']['time'],
-                params = config['statistics']['cv_summary']['params'],
-                output_dir = CELLTYPING_OUT,
-                sample_name = "{sample}",
-                method_name = "{method}"
-        threads:
-                config['statistics']['cv_summary']['threads']
-        benchmark:
-                CELLTYPING_OUT + '{sample}/{method}/{sample}.{method}.cv_summary.benchmark'
-        shell:
-                config['statistics']['calc_accuracy']['call'] + ' --sce {input.sce_in} --predicted_labels_path {input.predicted_labels} --output_dir {params.output_dir} --sample_name {params.sample_name} --method_name {params.method_name}'
-"""
 rule evaluate_classifier:
         input:
                 sce_in = INPUTDIR + "{sample}.RDS",

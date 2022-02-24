@@ -21,9 +21,7 @@ if not 'TMPDIR' in globals():
     print('You have to specify the root directory where temporary files will be stored!')
     sys.exit(1)
 
-# Include the rules
-include: "testing_rules.py"
-
+K_FOLD_INDEX = list(range(1, config['statistics']['cross_validation']['k_folds'] + 1))
 SELECTED_METHODS = config['resources']['celltype_methods']
 TRAINED_MODELS = config['resources']['trained_models']
 
@@ -38,11 +36,12 @@ CELLTYPING_OUT = OUTDIR + "celltyping/"
 
 # Include the rules
 include: "testing_rules.py"
+include: "training_rules.py"
 localrules: all
 rule all:
 	input:
 		expand(CELLTYPING_OUT + '{sample}/{method}/predicted_labels.{model}.csv', sample = get_sample_names(), method = SELECTED_METHODS, model = TRAINED_MODELS),
-                expand(CELLTYPING_OUT + '{sample}/scROSI/predicted_labels.csv', sample = get_sample_names()),
+                expand(CELLTYPING_OUT + '{sample}/scROSHI/predicted_labels.csv', sample = get_sample_names()),
                 expand(CELLTYPING_OUT + "{sample}/{method}/{sample}.{model}.f1-score_{method}.csv", sample = get_sample_names(), method = SELECTED_METHODS, model = TRAINED_MODELS)
                 #expand(CELLTYPING_OUT + "{sample}/{method}/{sample}.f1-score_{method}.csv", sample = get_sample_names(), method = SELECTED_METHODS)
 	output:

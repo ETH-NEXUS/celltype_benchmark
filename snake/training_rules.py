@@ -291,6 +291,8 @@ def getTrainedSubsets(wildcards):
 
 if not 'CV_SUMMARY_IN' in globals():
     CV_SUMMARY_IN = INPUTDIR
+if not 'CV_SUMMARY_OUT' in globals():
+    CV_SUMMARY_OUT = OUTDIR + "cv_summary/
 
 # get the crossvalidation summary
 rule cv_summary_train:
