@@ -311,7 +311,7 @@ rule cv_summary_train:
                 output_dir = CV_SUMMARY_OUT,
                 barcodes_dir = CV_FOLD_OUT,
                 sample_name = "{sample}",
-                tools = ",".join(config['resources']['tools'])
+                tools = ",".join(config['resources']['celltype_methods'])
         threads:
                 config['statistics']['cv_summary']['threads']
         benchmark:
