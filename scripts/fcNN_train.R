@@ -11,13 +11,6 @@ library(keras)
 library(SingleCellExperiment)
 
 #Data Path
-#opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  CVindex = "/Users/bolars/Documents/celltyping/benchmark_scripts/indexFold_01.RDS",
-#  sampleName = "Fold_01",
-#  method = "fcNN"
-#)
 
 # command line arguments are parsed
 option_list = list(

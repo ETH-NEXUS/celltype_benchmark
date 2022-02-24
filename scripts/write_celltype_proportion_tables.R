@@ -24,10 +24,6 @@ data_raw_path <- opt$data_raw
 data_subset_raw_path <- opt$data_subset_raw
 data_dictionary_path <- opt$data_dict
 
-#base_path <- "/cluster/dataset/nexus/benchmarking/celltyping/data/"
-#data_full_path <- paste0(base_path,"zheng_sorted/extended_sce/zheng_sorted_extended.RDS")
-#data_subset_path <- paste0(base_path, "subset/zheng_sorted_merged_full.genes_cells_filtered.corrected.RDS")
-#data_dictionary_path <- paste0(base_path, "zheng_sorted/zheng_ground_truth.tsv")
 print(opt$data_full)
 if(length(opt$data_full)){data_full_sce <- readRDS(data_full_path)}else{data_full_sce <- ""}
 #data_raw_barcodes <- h5read(opt$data_raw,"cell_attrs/cell_names")

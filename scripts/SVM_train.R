@@ -11,13 +11,6 @@ library(caret)
 library(SingleCellExperiment)
 
 #Data Path
-#opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/output/Adult_PBMC_subset_test.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/output/training/",
-#  CVindex = "/Users/bolars/Documents/celltyping/output/training/Adult_PBMC_subset.index_All.RDS",
-#  sampleName = "All",
-#  method = "SVM"
-#)
 # command line arguments are parsed
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),

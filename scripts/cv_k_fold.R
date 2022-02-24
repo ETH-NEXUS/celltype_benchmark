@@ -9,11 +9,6 @@ library(tidyverse)
 library(caret)
 
 #Data Path
-#opt = list(
-#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_merged_annotated.RDS",
-#  kfold = 5
-#)
 
 # command line arguments are parsed
 option_list = list(

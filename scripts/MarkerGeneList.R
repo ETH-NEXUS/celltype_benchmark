@@ -1,5 +1,5 @@
 ################################################################################
-## Finding marker genes for Garnet and scROSI method
+## Finding marker genes for Garnett and scROSHI method
 ################################################################################
 
 #library
@@ -7,17 +7,6 @@ library(optparse)
 library(tidyverse)
 library(Seurat)
 library(SingleCellExperiment)
-
-#Data Path
-#opt = list(
-#  outputDirec = "/Users/bolars/Documents/celltyping/MarkerGeneList/",
-#  SCE = "/Users/bolars/Documents/celltyping/MarkerGeneList/Zheng_merged_annotated.RDS",
-#  sampleName = "Zheng",
-#  config = "/Users/bolars/Documents/celltyping/MarkerGeneList/celltype_config_PBMC.txt",
-#  format = c("gmx","garnett"),
-#  foldChange = c(2,1.5),
-#  p_val_adj = 0.05
-#)
 
 # command line arguments are parsed
 option_list = list(

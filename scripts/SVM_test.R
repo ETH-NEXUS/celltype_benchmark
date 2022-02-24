@@ -10,13 +10,6 @@ library(cowplot)
 library(SingleCellExperiment)
 
 #Data Path
-#opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/output/Zheng_320nodg_test.RDS",
-#  outputFile = "/Users/bolars/Documents/celltyping/output/training/pred_svm_zheng.txt",
-#  svm_model = "/Users/bolars/Documents/celltyping/output/training/All.SVM_model.RDS",
-#  sampleName = "SVM_test",
-#  method = "SVM"
-#)
 # command line arguments are parsed
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),
