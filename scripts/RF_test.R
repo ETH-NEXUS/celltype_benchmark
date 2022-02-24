@@ -9,13 +9,6 @@ library(randomForest)
 library(cowplot)
 library(SingleCellExperiment)
 #Data Path
-#opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/output/Newborn_PBMC_subset_test.RDS",
-#  outputFile = "/Users/bolars/Documents/celltyping/output/training/pred_rf_newb_2.txt",
-#  rf_model = "/Users/bolars/Documents/celltyping/output/training/All.RF_model_2.RDS",
-#  sampleName = "RF_test",
-#  method = "RF"
-#)
 # command line arguments are parsed
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),

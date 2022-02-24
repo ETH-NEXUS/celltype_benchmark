@@ -35,7 +35,7 @@ if not 'MARKER_GENES_IN' in globals():
 if not 'MARKER_GENES_OUT' in globals():
     MARKER_GENES_OUT = OUTDIR + 'marker_genes/'
 
-print(MARKER_GENES_IN)
+#print(MARKER_GENES_IN)
 # identify marker genes
 rule find_markers:
         input:

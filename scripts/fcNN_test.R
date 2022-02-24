@@ -10,13 +10,6 @@ library(cowplot)
 library(keras)
 
 #Data Path
-#opt = list(
-#  SCE = "/Users/bolars/Documents/celltyping/benchmark_scripts/Zheng_sorted_merged.genes_cells_filtered.corrected.ground-truth.RDS",
-#  outputDirec = "/Users/bolars/Documents/celltyping/benchmark_scripts/",
-#  nn_model = "/Users/bolars/Documents/celltyping/benchmark_scripts/All.fcNN_model.h5",
-#  sampleName = "fcNN_Test",
-#  method = "fcNN"
-#)
 # command line arguments are parsed
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce onject file with input data (sce_basic.RDS)."),

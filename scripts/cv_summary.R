@@ -11,14 +11,6 @@ library(Hmisc)
 library(SingleCellExperiment)
 
 #Data Path
-#opt = list(
-#  outputDirec = "/Users/bolars/Documents/celltyping/test_run/test_06_10_2020/results/",
-#  CVfiles = "/Users/bolars/Documents/celltyping/test_run/test_06_10_2020/files/",
-#  CVIndex = "/Users/bolars/Documents/celltyping/test_run/test_06_10_2020/index/",
-#  SCE = "/Users/bolars/Documents/celltyping/test_run/test_06_10_2020/Adult_PBMC_subset.RDS",
-#  sampleName = "Adult_PBMC_subset",
-#  method = c("rf","svm","garnett")
-#)
 # command line arguments are parsed
 option_list = list(
   make_option("--SCE", type = "character", help = "Path to sce object file with input data (sce_basic.RDS)."),

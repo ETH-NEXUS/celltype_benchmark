@@ -14,8 +14,6 @@ option_list = list(
 opt_parser = OptionParser(option_list = option_list)
 opt = parse_args(opt_parser)
 
-#data_path <- "/cluster/project/nexus/benchmarking/celltyping/test_pilot/cellranger_run/zheng_sorted_merged/"
-
 #cds <- load_cellranger_data(data_path)
 print("Loading cell data set...")
 cds <- readRDS(opt$cds)
@@ -29,10 +27,6 @@ print(class(cds))
 
 #cds <- process_cds_monocle(cds)
 
-#marker_file_path <- c(
-#  "/cluster/project/nexus/benchmarking/celltyping/garnett_files/marker_files/hsPBMC_markers.txt", 
-#  "/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_Garnett_markers.txt"
-#  )
 marker_file_path <- opt$marker_file
 print("Starting marker check...")
 marker_check <- check_markers(cds = cds, marker_file = marker_file_path, 
@@ -48,10 +42,6 @@ median(as.matrix(na.omit(marker_check$marker_score)))
 high_markers <- ok_markers[ok_markers$marker_score > median(as.matrix(na.omit(marker_check$marker_score))),]
 top_markers <- ok_markers[ok_markers$marker_score > 1,]
 
-#marker_check_zheng <- check_markers(cds = cds, 
-#                                    marker_file = "/cluster/project/nexus/benchmarking/celltyping/marker_files/PBMC/PBMC_Garnett_markers_Zheng.txt", 
-#                              db = org.Hs.eg.db, classifier_gene_id_type = "SYMBOL",
-#                              cds_gene_id_type = "ENSEMBL")
 
 #plot_markers(marker_check[marker_check$summary=="Ok",])
 print(ok_markers)

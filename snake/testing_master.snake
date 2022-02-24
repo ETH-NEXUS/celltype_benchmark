@@ -27,9 +27,9 @@ include: "testing_rules.py"
 SELECTED_METHODS = config['resources']['celltype_methods']
 TRAINED_MODELS = config['resources']['trained_models']
 
-print(SELECTED_METHODS)
-print(TRAINED_MODELS)
-print(get_sample_names())
+#print(SELECTED_METHODS)
+#print(TRAINED_MODELS)
+#print(get_sample_names())
 
 ####################################################
 

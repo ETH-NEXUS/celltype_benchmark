@@ -12,9 +12,6 @@ parser.add_argument('--subtype_dictionary', metavar='type=string',
 parser.add_argument('--output', help='Output path to final ground truth label file.')
 opt = parser.parse_args()
 
-#file_path = "/cluster/work/nexus/benchmarking/celltyping/data/broad/2020-Mar-Census-Adult-Immune-10x/2020-Mar-Census-Adult-Immune-10x_annotated_v1.scp.metadata.txt"
-#file_path = "/cluster/work/nexus/benchmarking/celltyping/data/broad/2020-Mar-Census-Newborn-Blood-10x/2020-Mar-Census-Newborn-10x_annotated_v1.scp.metadata.txt"
-
 mode = ""
 if("broad" in opt.original_labels.lower()):
     mode = "broad"

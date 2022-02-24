@@ -6,9 +6,9 @@ input_output:
 
 resources:
     conda_path: ""
-    celltype_methods: ["svm","rf","garnett","fcnn"]
-    trained_models: ["svm","rf","garnett","fcnn"],
-    celltype_config_gt: "/cluster/project/nexus/benchmarking/celltyping/git/marker_files/PBMC/celltype_config_PBMC_groundtruth.txt"
+    celltype_methods: ["svm","rf","garnett","scROSHI"]
+    trained_models: ["svm","rf","garnett","scROSHI"],
+    celltype_config_gt: "PATH_TO_GIT/marker_files/PBMC/celltype_config_PBMC_groundtruth.txt"
 
 statistics:
 
@@ -31,19 +31,19 @@ statistics:
 preprocessing:
 
   sce_to_cds:
-    call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/convert_sce_to_cds.R"
+    call: "Rscript PATH_TO_GIT/scripts/convert_sce_to_cds.R"
     scratch: "1000"
     mem: "1000"
     time: "200"
     threads: 1
     params: ""
-    conda: "/cluster/project/nexus/benchmarking/celltyping/docs/conda_envs/garnett.yaml"
+    conda: "PATH_TO_GIT/docs/conda_envs/garnett.yaml"
 
 methods:
 
   rf:
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/RF_test.R"
+      call: "Rscript PATH_TO_GIT/scripts/RF_test.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -51,7 +51,7 @@ methods:
 
   svm:
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/SVM_test.R"
+      call: "Rscript PATH_TO_GIT/scripts/SVM_test.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -59,7 +59,7 @@ methods:
 
   fcnn:
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/fcNN_test.R"
+      call: "Rscript PATH_TO_GIT/scripts/fcNN_test.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -67,23 +67,23 @@ methods:
 
   garnett:
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_garnett.R"
+      call: "Rscript PATH_TO_GIT/scripts/test_garnett.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
-    conda: "/cluster/project/nexus/benchmarking/celltyping/docs/conda_envs/garnett.yaml"
+    conda: "PATH_TO_GIT/docs/conda_envs/garnett.yaml"
 
-  prep_scROSI_config:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/prepare_scROSI_config.py"
+  prep_scROSHI_config:
+      call: "Rscript PATH_TO_GIT/scripts/prepare_scROSHI_config.py"
       scratch: "2000"
       mem: "2000"
       time: "200"
       threads: 1
 
-  scROSI:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/scROSI.R"
+  scROSHI:
+      call: "Rscript PATH_TO_GIT/scripts/scROSHI.R"
       scratch: "2000"
       mem: "4000"
       time: "200"

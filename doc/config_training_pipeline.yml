@@ -13,7 +13,7 @@ resources:
 statistics:
 
   cross_validation:
-    call: "/cluster/project/nexus/benchmarking/celltyping/git/scripts/cv_k_folds.R"
+    call: "PATH_TO_GIT/scripts/cv_k_folds.R"
     scratch: "1000"
     mem: "1000"
     time: "200"
@@ -22,7 +22,7 @@ statistics:
     params: ""
 
   cv_summary:
-    call: "/cluster/project/nexus/benchmarking/celltyping/git/scripts/cv_summary.R"
+    call: "PATH_TO_GIT/scripts/cv_summary.R"
     scratch: "1000"
     mem: "1000"
     time: "200"
@@ -49,7 +49,7 @@ statistics:
 markers:
 
   find_markers:
-    call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/MarkerGeneList.R"
+    call: "Rscript PATH_TO_GIT/scripts/MarkerGeneList.R"
     scratch: "1000"
     mem: "1000"
     time: "200"
@@ -57,7 +57,7 @@ markers:
     params: ""
 
   convert_markers:
-    call: "python /cluster/project/nexus/benchmarking/celltyping/git/scripts/convert_marker_file.py"
+    call: "python PATH_TO_GIT/scripts/convert_marker_file.py"
     scratch: "1000"
     mem: "1000"
     time: "200"
@@ -67,26 +67,26 @@ markers:
 preprocessing:
 
   sce_to_cds:
-    call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/convert_sce_to_cds.R"
+    call: "Rscript PATH_TO_GIT/scripts/convert_sce_to_cds.R"
     scratch: "1000"
     mem: "1000"
     time: "200"
     threads: 1
     params: ""
-    conda: "/cluster/project/nexus/benchmarking/celltyping/docs/conda_envs/garnett.yaml"
+    conda: "PATH_TO_GIT/docs/conda_envs/garnett.yaml"
 
 methods:
 
   rf:
     train:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_rf.R"
+      call: "Rscript PATH_TO_GIT/scripts/train_rf.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_rf.R"
+      call: "Rscript PATH_TO_GIT/scripts/test_rf.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -95,14 +95,14 @@ methods:
 
   svm:
     train:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_svm.R"
+      call: "Rscript PATH_TO_GIT/scripts/train_svm.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_svm.R"
+      call: "Rscript PATH_TO_GIT/scripts/test_svm.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
@@ -111,24 +111,24 @@ methods:
 
   garnett:
     train: 
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/train_garnett.R"
+      call: "Rscript PATH_TO_GIT/scripts/train_garnett.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_garnett.R"
+      call: "Rscript PATH_TO_GIT/scripts/test_garnett.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
       threads: 1
       params: ""
-    conda: "/cluster/project/nexus/benchmarking/celltyping/docs/conda_envs/garnett.yaml"
+    conda: "PATH_TO_GIT/docs/conda_envs/garnett.yaml"
 
   nexus:
     test:
-      call: "Rscript /cluster/project/nexus/benchmarking/celltyping/git/scripts/test_nexus.R"
+      call: "Rscript PATH_TO_GIT/scripts/test_nexus.R"
       scratch: "1000"
       mem: "1000"
       time: "200"
